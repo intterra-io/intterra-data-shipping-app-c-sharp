@@ -1,0 +1,28 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 14
+VisualStudioVersion = 14.0.25420.1
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DSA.Console", "DSA.Console\DSA.Console.csproj", "{32F1B09A-9CDB-4C8B-B56E-3CA7B31FC0F1}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DSA.Library", "DSA.Lib\DSA.Library.csproj", "{64DC60E5-5B69-4526-915F-54121FC1F018}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{32F1B09A-9CDB-4C8B-B56E-3CA7B31FC0F1}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{32F1B09A-9CDB-4C8B-B56E-3CA7B31FC0F1}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{32F1B09A-9CDB-4C8B-B56E-3CA7B31FC0F1}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{32F1B09A-9CDB-4C8B-B56E-3CA7B31FC0F1}.Release|Any CPU.Build.0 = Release|Any CPU
+		{64DC60E5-5B69-4526-915F-54121FC1F018}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{64DC60E5-5B69-4526-915F-54121FC1F018}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{64DC60E5-5B69-4526-915F-54121FC1F018}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{64DC60E5-5B69-4526-915F-54121FC1F018}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+EndGlobal
