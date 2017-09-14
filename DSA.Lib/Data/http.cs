@@ -3,6 +3,8 @@ using System.Collections.Generic;
 using System.Collections.Specialized;
 using System.Linq;
 using System.Net;
+using System.Net.Http;
+using System.Net.Http.Headers;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -27,6 +29,21 @@ namespace DSA.Lib.Data
             }
             return response;
         }
+
+        public static async Task<string> Post(string uri, MultipartFormDataContent form, AuthenticationHeaderValue authorization = null)
+        { 
+            using (var httpClient = new HttpClient())
+            {
+                if (authorization != null)
+                {
+                    httpClient.DefaultRequestHeaders.Authorization = authorization;
+                }
+                var response = await httpClient.PostAsync(uri, form);
+                return response.Content.ReadAsStringAsync().Result;
+            }
+        }
+
+
 
         /// <summary>
         /// Makes Get request using WebClient

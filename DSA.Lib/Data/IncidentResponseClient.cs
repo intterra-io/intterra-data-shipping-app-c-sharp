@@ -17,9 +17,14 @@ namespace DSA.Lib.Data
             Query = query;
         }
 
-        public string Get()
+        public string GetJson()
         {
             return GetJson(Query);
+        }
+
+        public string GetCsv()
+        {
+            return GetCsv(Query);
         }
     }
 }

@@ -6,7 +6,10 @@ using System;
 using System.Collections.Generic;
 using System.Collections.Specialized;
 using System.Linq;
+using System.Net.Http;
+using System.Net.Http.Headers;
 using System.Text;
+using System.Threading.Tasks;
 
 namespace DSA.Lib
 {
@@ -15,27 +18,39 @@ namespace DSA.Lib
         public UpdaterOpts Opts { get; set; }
         public DateTime lastUpdateOn { get; private set; }
 
+        private const int MaxLimit = 10000;
+
         public Updater(UpdaterOpts opts)
         {
             Opts = opts;
             lastUpdateOn = GetLastUpdatedOn();
+            Opts.Limit = Opts.Limit > MaxLimit ? MaxLimit : Opts.Limit;
         }
 
-        public Guid Run()
+        public async Task<Guid> Run()
         {
-            var unitsJson = new IncidentResponseClient(Opts.ConnectionString, Opts.UnitsQuery.Replace("{{LIMIT}}", Opts.Limit.ToString()).Replace("{{LASTUPDATEDDATETIME}}", lastUpdateOn.ToString())).Get();
-            var incidentJson = new IncidentResponseClient(Opts.ConnectionString, Opts.UnitsQuery.Replace("{{LIMIT}}", Opts.Limit.ToString()).Replace("{{LASTUPDATEDDATETIME}}", lastUpdateOn.ToString())).Get();
-
-            var result = JObject.Parse(Http.Post(Opts.DataUrl, new NameValueCollection()
+            try
             {
-                { "type", Opts.DataType },
-                { "apiKey", Opts.ApiKey },
-                { "apiKeySecret", Opts.ApiKeySecret },
-                { "incidents", incidentJson },
-                { "units", unitsJson }
-            }));
+                var unitsCsv = new IncidentResponseClient(Opts.ConnectionString, Opts.UnitsQuery.Replace("{{LIMIT}}", Opts.Limit.ToString()).Replace("{{LASTUPDATEDDATETIME}}", lastUpdateOn.ToString())).GetCsv();
+                var incidentCsv = new IncidentResponseClient(Opts.ConnectionString, Opts.UnitsQuery.Replace("{{LIMIT}}", Opts.Limit.ToString()).Replace("{{LASTUPDATEDDATETIME}}", lastUpdateOn.ToString())).GetCsv();
+                var units = Encoding.UTF8.GetBytes(unitsCsv);
+                var incidents = Encoding.UTF8.GetBytes(incidentCsv);
 
-            return Guid.Parse(result["transactionId"]?.ToString());
+                MultipartFormDataContent form = new MultipartFormDataContent();
+
+                form.Add(new StringContent(Opts.DataType), "type");
+                form.Add(new ByteArrayContent(incidents, 0, incidents.Length), "incidents", "incidents.csv");
+                form.Add(new ByteArrayContent(units, 0, units.Length), "units", "units.csv");
+
+                var resultString = await Http.Post(Opts.DataUrl, form, new AuthenticationHeaderValue("Basic", Convert.ToBase64String(Encoding.UTF8.GetBytes($"{Opts.ApiKey}:{Opts.ApiKeySecret}"))));
+                var result = JObject.Parse(resultString);
+                return Guid.Parse(result["transactionId"]?.ToString());
+            }
+            catch (Exception ex)
+            {
+
+                throw;
+            }
         }
 
         private DateTime GetLastUpdatedOn()
@@ -46,7 +61,7 @@ namespace DSA.Lib
                 { "apiKey", Opts.ApiKey },
                 { "apiKeySecret", Opts.ApiKeySecret }
             }));
-            TimeZoneInfo tz = TimeZoneInfo.FindSystemTimeZoneById(result["tz"]?.ToString());
+            TimeZoneInfo tz = TimezoneConverter.PosixToTimezone(result["tz"]?.ToString());
             DateTime utcTime = new DateTime();
 
             if (result["timestamp"]?.ToString() != null)
