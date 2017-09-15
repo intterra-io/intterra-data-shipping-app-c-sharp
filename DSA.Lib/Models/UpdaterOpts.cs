@@ -14,6 +14,7 @@ namespace DSA.Lib.Models
         public string ApiKeySecret { get; set; }
         public string LastDatetimeUrl { get; set; }
         public string DataUrl { get; set; }
+        public string TestUrl { get; set; }
         public string DataType { get; set; }
         public int Limit { get; set; }
 

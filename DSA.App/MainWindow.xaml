@@ -1,0 +1,54 @@
+﻿<Window x:Class="DSA.App.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:DSA.App"
+        mc:Ignorable="d"
+        Title="Intterra Data Shipping App" Height="600" Width="800" Background="#1E1E1E" >
+    <ScrollViewer>
+        <StackPanel Margin="0 0 0 20">
+            <StackPanel>
+                <Label Content="Authentication" FontSize="24" Foreground="Gray"/>
+                <Label Content="Api Key" Foreground="Gray" Margin="10 0"/>
+                <TextBox Text="{Binding ApiKey, Mode=TwoWay}" TextWrapping="NoWrap" Background="#0F0F0F" Foreground="LightGray" BorderBrush="Gray" Margin="10 0" />
+                <Label Content="Api Key Secret" Foreground="Gray" Margin="10 0"/>
+                <TextBox Text="{Binding ApiKeySecret, Mode=TwoWay}" TextWrapping="NoWrap" Background="#0F0F0F" Foreground="LightGray" BorderBrush="Gray" Margin="10 0" />
+                <Button x:Name="TestApiConnectivityButton" Content="Test API Connectivity" Margin="10" Width="150" Background="#333" Foreground="LightGray" Click="TestApiConnectivityClick" />
+                <TextBlock x:Name="TestApiConnectivityResponse" TextWrapping="Wrap" Foreground="LightGray" Height="33" Margin="10 0" TextAlignment="Center" />
+            </StackPanel>
+            <StackPanel>
+                <Label Content="Data" FontSize="24" Foreground="Gray"/>
+                <Label Content="SQL Server Connection" Foreground="Gray" Margin="10 0"/>
+                <TextBox Text="{Binding AnalyticsConnectionString, Mode=TwoWay}" TextWrapping="NoWrap" Background="#0F0F0F" Foreground="LightGray" BorderBrush="Gray" Margin="10 0" />
+                <Button x:Name="TestDataConnectivityButton" Content="Test Data Connectivity" Margin="10" Width="150" Background="#333" Foreground="LightGray" Click="TestDataConnectivityClick" />
+                <TextBlock x:Name="TestDataConnectivityResponse" TextWrapping="Wrap" Foreground="LightGray" Height="33" Margin="10 0" TextAlignment="Center" />
+            </StackPanel>
+            <StackPanel>
+                <Label Content="Queries" FontSize="24" Foreground="Gray"/>
+                <Label Content="Incidents Query" Foreground="Gray" Margin="10 0"/>
+                <TextBox Text="{Binding AnalyticsIncidentsQuery, Mode=TwoWay}" TextWrapping="Wrap" AcceptsReturn="True" VerticalScrollBarVisibility="Auto" Background="#0F0F0F" Foreground="LightGray" BorderBrush="Gray" Margin="10 0" Height="66" />
+                <Button x:Name="TestIncidentsQueryButton" Content="Test Incident Query" Margin="10" Width="150" Background="#333" Foreground="LightGray" Click="TestIncidentsQueryClick" />
+                <TextBlock x:Name="TestIncidentsQueryResponse" TextWrapping="Wrap" Foreground="LightGray" Height="33" Margin="10 0" TextAlignment="Center" />
+                <Label Content="Units Query" Foreground="Gray" Margin="10 0"/>
+                <TextBox Text="{Binding AnalyticsUnitsQuery, Mode=TwoWay}" TextWrapping="Wrap" AcceptsReturn="True" VerticalScrollBarVisibility="Auto" Background="#0F0F0F" Foreground="LightGray" BorderBrush="Gray" Margin="10 0" Height="66" />
+                <Button x:Name="TestUnitsQueryButton" Content="Test Queries" Margin="10" Width="150" Background="#333" Foreground="LightGray" Click="TestUnitsQueryClick" />
+                <TextBlock x:Name="TestUnitsQueryResponse" TextWrapping="Wrap" Foreground="LightGray" Height="33" Margin="10 0" TextAlignment="Center" />
+            </StackPanel>
+            <StackPanel>
+                <Label Content="Run All" FontSize="24" Foreground="Gray"/>
+                <Button x:Name="RunAllButton" Content="Upload Data" Margin="10" Width="150" Background="#333" Foreground="LightGray" Click="RunAllClick" />
+                <TextBlock x:Name="RunAllResponse" TextWrapping="Wrap" Foreground="LightGray" Height="33" Margin="10 0" TextAlignment="Center" />
+            </StackPanel>
+            <StackPanel>
+                <Label Content="Task Scheduler" FontSize="24" Foreground="Gray"/>
+                <Label Content="Interval in Minutes" Foreground="Gray" Margin="10 0"/>
+                <TextBox Text="{Binding RunInterval, Mode=TwoWay}" Background="#0F0F0F" Foreground="LightGray" BorderBrush="Gray" Margin="10 0" />
+                <Label Content="Password for Local User Account" Foreground="Gray" Margin="10 0"/>
+                <PasswordBox x:Name="PasswordTextBox" Background="#0F0F0F" Foreground="LightGray" BorderBrush="Gray" Margin="10 0" />
+                <Button x:Name="CreateTaskButton" Content="Schedule Task" Margin="10" Width="150" Background="#333" Foreground="LightGray" Click="CreateTaskClick" />
+                <TextBlock x:Name="CreateTaskResponse" TextWrapping="Wrap" Foreground="LightGray" Height="33" Margin="10 0" TextAlignment="Center" />
+            </StackPanel>
+        </StackPanel>
+    </ScrollViewer>
+</Window>

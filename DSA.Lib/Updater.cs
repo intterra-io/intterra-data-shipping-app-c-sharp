@@ -29,28 +29,72 @@ namespace DSA.Lib
 
         public async Task<Guid> Run()
         {
-            try
+            var unitsCsv = GetUnits();
+            var incidentCsv = GetIncidents();
+            var units = Encoding.UTF8.GetBytes(unitsCsv);
+            var incidents = Encoding.UTF8.GetBytes(incidentCsv);
+
+            MultipartFormDataContent form = new MultipartFormDataContent();
+
+            form.Add(new StringContent(Opts.DataType), "\"type\"");
+            form.Add(new ByteArrayContent(incidents, 0, incidents.Length), "\"incidents\"", "incidents.csv");
+            form.Add(new ByteArrayContent(units, 0, units.Length), "\"units\"", "units.csv");
+
+            var resultString = await Http.Post(Opts.DataUrl, form, GetAuthHeader());
+            var result = JObject.Parse(resultString);
+            return Guid.Parse(result["transactionId"]?.ToString());
+        }
+
+        private string GetIncidents()
+        {
+            return new IncidentResponseClient(Opts.ConnectionString, Opts.UnitsQuery.Replace("{{LIMIT}}", Opts.Limit.ToString()).Replace("{{LASTUPDATEDDATETIME}}", lastUpdateOn.ToString())).GetCsv();
+        }
+
+        private string GetUnits()
+        {
+            return new IncidentResponseClient(Opts.ConnectionString, Opts.UnitsQuery.Replace("{{LIMIT}}", Opts.Limit.ToString()).Replace("{{LASTUPDATEDDATETIME}}", lastUpdateOn.ToString())).GetCsv();
+        }
+
+        private AuthenticationHeaderValue GetAuthHeader()
+        {
+            return new AuthenticationHeaderValue("Basic", Convert.ToBase64String(Encoding.UTF8.GetBytes($"{Opts.ApiKey}:{Opts.ApiKeySecret}")));
+        }
+
+        public async Task<string> TestApiConnectivity()
+        {
+            using (var httpClient = new HttpClient())
             {
-                var unitsCsv = new IncidentResponseClient(Opts.ConnectionString, Opts.UnitsQuery.Replace("{{LIMIT}}", Opts.Limit.ToString()).Replace("{{LASTUPDATEDDATETIME}}", lastUpdateOn.ToString())).GetCsv();
-                var incidentCsv = new IncidentResponseClient(Opts.ConnectionString, Opts.UnitsQuery.Replace("{{LIMIT}}", Opts.Limit.ToString()).Replace("{{LASTUPDATEDDATETIME}}", lastUpdateOn.ToString())).GetCsv();
-                var units = Encoding.UTF8.GetBytes(unitsCsv);
-                var incidents = Encoding.UTF8.GetBytes(incidentCsv);
-
-                MultipartFormDataContent form = new MultipartFormDataContent();
-
-                form.Add(new StringContent(Opts.DataType), "type");
-                form.Add(new ByteArrayContent(incidents, 0, incidents.Length), "incidents", "incidents.csv");
-                form.Add(new ByteArrayContent(units, 0, units.Length), "units", "units.csv");
-
-                var resultString = await Http.Post(Opts.DataUrl, form, new AuthenticationHeaderValue("Basic", Convert.ToBase64String(Encoding.UTF8.GetBytes($"{Opts.ApiKey}:{Opts.ApiKeySecret}"))));
-                var result = JObject.Parse(resultString);
-                return Guid.Parse(result["transactionId"]?.ToString());
+                httpClient.DefaultRequestHeaders.Authorization = GetAuthHeader();
+                var response = await httpClient.PostAsync(Opts.TestUrl, new StringContent("{\"message\":\"test\"}", Encoding.UTF8, "application/json"));
+                return response.Content.ReadAsStringAsync().Result;
             }
-            catch (Exception ex)
+        }
+
+        public async Task<string> TestDataConnectivity()
+        {
+            var result = await Task.Run(() =>
             {
+                return new IncidentResponseClient(Opts.ConnectionString, "Select 'Success!' as message;").GetJson();
+            });
+            return result;
+        }
 
-                throw;
-            }
+        public async Task<string> TestIncidentsQuery()
+        {
+            var result = await Task.Run(() =>
+            {
+                return GetIncidents();
+            });
+            return result;
+        }
+
+        public async Task<string> TestUnitsQuery()
+        {
+            var result = await Task.Run(() =>
+            {
+                return GetUnits();
+            });
+            return result;
         }
 
         private DateTime GetLastUpdatedOn()
