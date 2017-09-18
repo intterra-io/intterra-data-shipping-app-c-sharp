@@ -6,49 +6,114 @@
         xmlns:local="clr-namespace:DSA.App"
         mc:Ignorable="d"
         Title="Intterra Data Shipping App" Height="600" Width="800" Background="#1E1E1E" >
-    <ScrollViewer>
-        <StackPanel Margin="0 0 0 20">
-            <StackPanel>
-                <Label Content="Authentication" FontSize="24" Foreground="Gray"/>
-                <Label Content="Api Key" Foreground="Gray" Margin="10 0"/>
-                <TextBox Text="{Binding ApiKey, Mode=TwoWay}" TextWrapping="NoWrap" Background="#0F0F0F" Foreground="LightGray" BorderBrush="Gray" Margin="10 0" />
-                <Label Content="Api Key Secret" Foreground="Gray" Margin="10 0"/>
-                <TextBox Text="{Binding ApiKeySecret, Mode=TwoWay}" TextWrapping="NoWrap" Background="#0F0F0F" Foreground="LightGray" BorderBrush="Gray" Margin="10 0" />
-                <Button x:Name="TestApiConnectivityButton" Content="Test API Connectivity" Margin="10" Width="150" Background="#333" Foreground="LightGray" Click="TestApiConnectivityClick" />
-                <TextBlock x:Name="TestApiConnectivityResponse" TextWrapping="Wrap" Foreground="LightGray" Height="33" Margin="10 0" TextAlignment="Center" />
-            </StackPanel>
-            <StackPanel>
-                <Label Content="Data" FontSize="24" Foreground="Gray"/>
-                <Label Content="SQL Server Connection" Foreground="Gray" Margin="10 0"/>
-                <TextBox Text="{Binding AnalyticsConnectionString, Mode=TwoWay}" TextWrapping="NoWrap" Background="#0F0F0F" Foreground="LightGray" BorderBrush="Gray" Margin="10 0" />
-                <Button x:Name="TestDataConnectivityButton" Content="Test Data Connectivity" Margin="10" Width="150" Background="#333" Foreground="LightGray" Click="TestDataConnectivityClick" />
-                <TextBlock x:Name="TestDataConnectivityResponse" TextWrapping="Wrap" Foreground="LightGray" Height="33" Margin="10 0" TextAlignment="Center" />
-            </StackPanel>
-            <StackPanel>
-                <Label Content="Queries" FontSize="24" Foreground="Gray"/>
-                <Label Content="Incidents Query" Foreground="Gray" Margin="10 0"/>
-                <TextBox Text="{Binding AnalyticsIncidentsQuery, Mode=TwoWay}" TextWrapping="Wrap" AcceptsReturn="True" VerticalScrollBarVisibility="Auto" Background="#0F0F0F" Foreground="LightGray" BorderBrush="Gray" Margin="10 0" Height="66" />
-                <Button x:Name="TestIncidentsQueryButton" Content="Test Incident Query" Margin="10" Width="150" Background="#333" Foreground="LightGray" Click="TestIncidentsQueryClick" />
-                <TextBlock x:Name="TestIncidentsQueryResponse" TextWrapping="Wrap" Foreground="LightGray" Height="33" Margin="10 0" TextAlignment="Center" />
-                <Label Content="Units Query" Foreground="Gray" Margin="10 0"/>
-                <TextBox Text="{Binding AnalyticsUnitsQuery, Mode=TwoWay}" TextWrapping="Wrap" AcceptsReturn="True" VerticalScrollBarVisibility="Auto" Background="#0F0F0F" Foreground="LightGray" BorderBrush="Gray" Margin="10 0" Height="66" />
-                <Button x:Name="TestUnitsQueryButton" Content="Test Queries" Margin="10" Width="150" Background="#333" Foreground="LightGray" Click="TestUnitsQueryClick" />
-                <TextBlock x:Name="TestUnitsQueryResponse" TextWrapping="Wrap" Foreground="LightGray" Height="33" Margin="10 0" TextAlignment="Center" />
-            </StackPanel>
-            <StackPanel>
-                <Label Content="Run All" FontSize="24" Foreground="Gray"/>
-                <Button x:Name="RunAllButton" Content="Upload Data" Margin="10" Width="150" Background="#333" Foreground="LightGray" Click="RunAllClick" />
-                <TextBlock x:Name="RunAllResponse" TextWrapping="Wrap" Foreground="LightGray" Height="33" Margin="10 0" TextAlignment="Center" />
-            </StackPanel>
-            <StackPanel>
-                <Label Content="Task Scheduler" FontSize="24" Foreground="Gray"/>
-                <Label Content="Interval in Minutes" Foreground="Gray" Margin="10 0"/>
-                <TextBox Text="{Binding RunInterval, Mode=TwoWay}" Background="#0F0F0F" Foreground="LightGray" BorderBrush="Gray" Margin="10 0" />
-                <Label Content="Password for Local User Account" Foreground="Gray" Margin="10 0"/>
-                <PasswordBox x:Name="PasswordTextBox" Background="#0F0F0F" Foreground="LightGray" BorderBrush="Gray" Margin="10 0" />
-                <Button x:Name="CreateTaskButton" Content="Schedule Task" Margin="10" Width="150" Background="#333" Foreground="LightGray" Click="CreateTaskClick" />
-                <TextBlock x:Name="CreateTaskResponse" TextWrapping="Wrap" Foreground="LightGray" Height="33" Margin="10 0" TextAlignment="Center" />
-            </StackPanel>
-        </StackPanel>
-    </ScrollViewer>
+    <Grid>
+        <TabControl x:Name="Tabs" Background="#1E1E1E" Margin="0 0 0 50" BorderThickness="0 1 0 0">
+            <TabItem Header="Authentication" >
+                <ScrollViewer VerticalScrollBarVisibility="Auto">
+                    <StackPanel>
+                        <Label Content="Authentication" Style="{StaticResource DarkTitle}" />
+                        <Label Content="Api Key" Style="{StaticResource DarkLabel}" />
+                        <TextBox Text="{Binding ApiKey, Mode=TwoWay}" Style="{StaticResource InputTextBox}" />
+                        <Label Content="Api Key Secret" Style="{StaticResource DarkLabel}"/>
+                        <TextBox Text="{Binding ApiKeySecret, Mode=TwoWay}" Style="{StaticResource InputTextBox}" />
+                        <Button x:Name="TestApiConnectivityButton" Content="Test API Connectivity" Style="{StaticResource DarkButton}" HorizontalAlignment="Center" Click="TestApiConnectivityClick" />
+                        <TextBox x:Name="TestApiConnectivityResponse" Style="{StaticResource ResultTextBox}" />
+                    </StackPanel>
+                </ScrollViewer>
+            </TabItem>
+            <TabItem Header="Database">
+                <ScrollViewer VerticalScrollBarVisibility="Auto">
+                    <StackPanel>
+                        <Label Content="Data" Style="{StaticResource DarkTitle}"/>
+                        <Label Content="SQL Server Connection" Style="{StaticResource DarkLabel}"/>
+                        <TextBox Text="{Binding AnalyticsConnectionString, Mode=TwoWay}" Style="{StaticResource InputTextBox}" />
+                        <Label Content="Batch Max Record Count" Style="{StaticResource DarkLabel}"/>
+                        <TextBox Text="{Binding Limit, Mode=TwoWay}" Style="{StaticResource InputTextBox}" />
+                        <Button x:Name="TestDataConnectivityButton" Content="Test Data Connectivity" Click="TestDataConnectivityClick" Style="{StaticResource DarkButton}" HorizontalAlignment="Center" />
+                        <TextBox x:Name="TestDataConnectivityResponse" Style="{StaticResource ResultTextBox}" />
+                    </StackPanel>
+                </ScrollViewer>
+            </TabItem>
+            <TabItem Header="Incidents Query">
+                <ScrollViewer VerticalScrollBarVisibility="Auto">
+                    <StackPanel>
+                        <Label Content="Incidents Query" Style="{StaticResource DarkTitle}"/>
+
+                        <DockPanel Margin="10 0 0 5 ">
+                            <Label Content="SELECT" Style="{StaticResource CodeLabel}" />
+                            <TextBox Text="{Binding AnalyticsIncidentsSelect, Mode=TwoWay}" Style="{StaticResource InputTextBox}" />
+                        </DockPanel>
+                        <DockPanel Margin="10 0 0 5 ">
+                            <Label Content="FROM" Style="{StaticResource CodeLabel}" />
+                            <TextBox Text="{Binding AnalyticsIncidentsFrom, Mode=TwoWay}" Style="{StaticResource InputTextBox}" />
+                        </DockPanel>
+                        <DockPanel Margin="10 0 0 5 ">
+                            <Label Content="WHERE" Style="{StaticResource CodeLabel}" />
+                            <TextBox Text="{Binding AnalyticsIncidentsWhere, Mode=TwoWay}" Style="{StaticResource InputTextBox}" />
+                        </DockPanel>
+                        <DockPanel Margin="10 0 0 5 ">
+                            <Label Content="ORDER BY" Style="{StaticResource CodeLabel}" />
+                            <TextBox Text="{Binding AnalyticsIncidentsOrderBy, Mode=TwoWay}" Style="{StaticResource InputTextBox}" />
+                        </DockPanel>
+
+                        <Button x:Name="TestIncidentsQueryButton" Content="Test Incident Query" Click="TestIncidentsQueryClick" Style="{StaticResource DarkButton}" HorizontalAlignment="Center" />
+                        <TextBox x:Name="TestIncidentsQueryResponse" Style="{StaticResource ResultTextBox}" />
+                    </StackPanel>
+                </ScrollViewer>
+            </TabItem>
+            <TabItem Header="Units Query">
+                <ScrollViewer VerticalScrollBarVisibility="Auto">
+                    <StackPanel>
+                        <Label Content="Units Query" Style="{StaticResource DarkTitle}"/>
+                        <DockPanel Margin="10 0 0 5 ">
+                            <Label Content="SELECT" Style="{StaticResource CodeLabel}" />
+                            <TextBox Text="{Binding AnalyticsUnitsSelect, Mode=TwoWay}" Style="{StaticResource InputTextBox}" />
+                        </DockPanel>
+                        <DockPanel Margin="10 0 0 5 ">
+                            <Label Content="FROM" Style="{StaticResource CodeLabel}" />
+                            <TextBox Text="{Binding AnalyticsUnitsFrom, Mode=TwoWay}" Style="{StaticResource InputTextBox}" />
+                        </DockPanel>
+                        <DockPanel Margin="10 0 0 5 ">
+                            <Label Content="WHERE" Style="{StaticResource CodeLabel}" />
+                            <TextBox Text="{Binding AnalyticsUnitsWhere, Mode=TwoWay}" Style="{StaticResource InputTextBox}" />
+                        </DockPanel>
+                        <DockPanel Margin="10 0 0 5 ">
+                            <Label Content="ORDER BY" Style="{StaticResource CodeLabel}" />
+                            <TextBox Text="{Binding AnalyticsUnitsOrderBy, Mode=TwoWay}" Style="{StaticResource InputTextBox}" />
+                        </DockPanel>
+
+                        <Button x:Name="TestUnitsQueryButton" Content="Test Units Query" Click="TestUnitsQueryClick" Style="{StaticResource DarkButton}" HorizontalAlignment="Center" />
+                        <TextBox x:Name="TestUnitsQueryResponse" Style="{StaticResource ResultTextBox}" />
+
+                    </StackPanel>
+                </ScrollViewer>
+            </TabItem>
+            <TabItem Header="Run All">
+                <ScrollViewer VerticalScrollBarVisibility="Auto">
+                    <StackPanel>
+                        <Label Content="Run All" Style="{StaticResource DarkTitle}"/>
+                        <Button x:Name="RunAllButton" Content="Upload Data" Click="RunAllClick" Style="{StaticResource DarkButton}" HorizontalAlignment="Center" />
+                        <TextBox x:Name="RunAllResponse" Style="{StaticResource ResultTextBox}" />
+                    </StackPanel>
+                </ScrollViewer>
+            </TabItem>
+            <TabItem Header="Task Scheduler">
+                <ScrollViewer VerticalScrollBarVisibility="Auto">
+                    <StackPanel>
+                        <Label Content="Task Scheduler" Style="{StaticResource DarkTitle}"/>
+                        <Label Content="Interval in Minutes" Style="{StaticResource DarkLabel}"/>
+                        <TextBox Text="{Binding RunInterval, Mode=TwoWay}" Style="{StaticResource InputTextBox}" />
+                        <Label Content="Password for Local User Account" Style="{StaticResource DarkLabel}"/>
+                        <PasswordBox x:Name="PasswordTextBox" Background="#0F0F0F" Foreground="LightGray" BorderBrush="Gray" Margin="10 0" />
+                        <Button x:Name="CreateTaskButton" Content="Schedule Task" Click="CreateTaskClick" Style="{StaticResource DarkButton}" HorizontalAlignment="Center" />
+                        <TextBox x:Name="CreateTaskResponse" Style="{StaticResource ResultTextBox}" />
+                    </StackPanel>
+                </ScrollViewer>
+            </TabItem>
+        </TabControl>
+        <DockPanel VerticalAlignment="Bottom">
+            <Button Content="Back" DockPanel.Dock="Left" HorizontalAlignment="Left" Style="{StaticResource DarkButton}" Click="BackButtonClick"  />
+            <Button Content="Next" DockPanel.Dock="Right" HorizontalAlignment="Right" Style="{StaticResource DarkButton}" Click="NextButtonClick"  />
+        </DockPanel>
+    </Grid>
 </Window>

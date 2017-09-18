@@ -22,5 +22,10 @@ namespace DSA.Lib.Models
         {
             Limit = 100000;
         }
+
+        public string BuildQuery(string select, string from, string where, string orderBy )
+        {
+            return $"SELECT {select}, COUNT(*) OVER() as total FROM {from} WHERE {where} ORDER BY {orderBy} OFFSET {{{{PAGE}}}} ROWS FETCH NEXT {Limit} ROWS ONLY";
+        }
     }
 }

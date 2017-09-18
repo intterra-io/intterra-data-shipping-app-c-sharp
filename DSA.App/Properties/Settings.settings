@@ -14,12 +14,6 @@
     <Setting Name="AnalyticsConnectionString" Type="System.String" Scope="User">
       <Value Profile="(Default)">Data Source=.\SQLEXPRESS;Initial Catalog=sandbox;Integrated Security=true</Value>
     </Setting>
-    <Setting Name="AnalyticsIncidentsQuery" Type="System.String" Scope="User">
-      <Value Profile="(Default)">SELECT TOP {{LIMIT}} * FROM dbo.incident_summary WHERE last_updated_rms &gt; '{{LASTUPDATEDDATETIME}}';</Value>
-    </Setting>
-    <Setting Name="AnalyticsUnitsQuery" Type="System.String" Scope="User">
-      <Value Profile="(Default)">SELECT TOP {{LIMIT}} * FROM dbo.unit_summary WHERE last_updated_rms &amp;gt; '{{LASTUPDATEDDATETIME}}';</Value>
-    </Setting>
     <Setting Name="Agency" Type="System.String" Scope="User">
       <Value Profile="(Default)" />
     </Setting>
@@ -28,9 +22,6 @@
     </Setting>
     <Setting Name="ApiKeySecret" Type="System.String" Scope="User">
       <Value Profile="(Default)">nuVhBSBwLqSHQHIEJAQubZQ0OvDmTTZwDk7TttViJ9O6xzCZtuaeGWExgXOwO1NN</Value>
-    </Setting>
-    <Setting Name="Limit" Type="System.Int32" Scope="User">
-      <Value Profile="(Default)">10000</Value>
     </Setting>
     <Setting Name="TestUrl" Type="System.String" Scope="User">
       <Value Profile="(Default)">/v1/keys/test</Value>
@@ -43,6 +34,33 @@
     </Setting>
     <Setting Name="TaskDescription" Type="System.String" Scope="User">
       <Value Profile="(Default)">Reads incident response data from RMS data sources as configured and send to Intterra's secure API</Value>
+    </Setting>
+    <Setting Name="AnalyticsIncidentsSelect" Type="System.String" Scope="User">
+      <Value Profile="(Default)">*</Value>
+    </Setting>
+    <Setting Name="AnalyticsIncidentsFrom" Type="System.String" Scope="User">
+      <Value Profile="(Default)">dbo.incident_summary</Value>
+    </Setting>
+    <Setting Name="AnalyticsIncidentsWhere" Type="System.String" Scope="User">
+      <Value Profile="(Default)">last_updated_rms &gt; '{{LASTUPDATEDDATETIME}}'</Value>
+    </Setting>
+    <Setting Name="AnalyticsIncidentsOrderBy" Type="System.String" Scope="User">
+      <Value Profile="(Default)">incident_datetime</Value>
+    </Setting>
+    <Setting Name="AnalyticsUnitsSelect" Type="System.String" Scope="User">
+      <Value Profile="(Default)">*</Value>
+    </Setting>
+    <Setting Name="AnalyticsUnitsFrom" Type="System.String" Scope="User">
+      <Value Profile="(Default)">dbo.unit_summary</Value>
+    </Setting>
+    <Setting Name="AnalyticsUnitsWhere" Type="System.String" Scope="User">
+      <Value Profile="(Default)">last_updated_rms &gt; '{{LASTUPDATEDDATETIME}}'</Value>
+    </Setting>
+    <Setting Name="AnalyticsUnitsOrderBy" Type="System.String" Scope="User">
+      <Value Profile="(Default)">last_updated_rms</Value>
+    </Setting>
+    <Setting Name="Limit" Type="System.Int32" Scope="User">
+      <Value Profile="(Default)">50</Value>
     </Setting>
   </Settings>
 </SettingsFile>

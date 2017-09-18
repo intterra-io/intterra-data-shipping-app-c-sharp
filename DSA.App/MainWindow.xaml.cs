@@ -1,10 +1,12 @@
 ﻿using DSA.App.Properties;
 using DSA.Lib;
+using DSA.Lib.Data;
 using DSA.Lib.Models;
 using Microsoft.Win32.TaskScheduler;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Security.Principal;
@@ -84,7 +86,9 @@ namespace DSA.App
 
             try
             {
-                TestIncidentsQueryResponse.Text = await Utility.GetUpdater().TestIncidentsQuery();
+                var updater = Utility.GetUpdater();
+                var response = await updater.TestIncidentsQuery();
+                TestIncidentsQueryResponse.Text = $"Found {response.Item2} incident records since {updater.LastUpdateOn} - {response.Item1}";
             }
             catch (Exception ex)
             {
@@ -103,7 +107,9 @@ namespace DSA.App
 
             try
             {
-                TestUnitsQueryResponse.Text = await Utility.GetUpdater().TestUnitsQuery();
+                var updater = Utility.GetUpdater();
+                var response = await updater.TestUnitsQuery();
+                TestUnitsQueryResponse.Text = $"Found {response.Item2} unit records since {updater.LastUpdateOn} - {response.Item1}";
             }
             catch (Exception ex)
             {
@@ -115,15 +121,17 @@ namespace DSA.App
             }
         }
 
-        private async void RunAllClick(object sender, RoutedEventArgs e)
+        private void RunAllClick(object sender, RoutedEventArgs e)
         {
             RunAllResponse.Text = "Working...";
             RunAllButton.IsEnabled = false;
 
             try
             {
-                var batchUuid = await Utility.GetUpdater().Run();
-                RunAllResponse.Text = batchUuid.ToString();
+                var batches = Utility.GetUpdater().Run();
+                var message = $"Successfully submitted {batches.Count()} batch(es): {string.Join(", ", batches.ToArray())}";
+                LogClient.Log(message);
+                RunAllResponse.Text = message;
             }
             catch (Exception ex)
             {
@@ -137,79 +145,57 @@ namespace DSA.App
 
         private void CreateTaskClick(object sender, RoutedEventArgs e)
         {
-            if (string.IsNullOrWhiteSpace(PasswordTextBox.Password))
-            {
-                CreateTaskResponse.Text = "Password is required";
-                return;
-            }
-
             CreateTaskResponse.Text = "Working...";
             CreateTaskButton.IsEnabled = false;
+            var taskMessage = string.Empty;
+            var taskError = string.Empty;
 
             try
             {
-                // Get the service on the local machine
-                using (TaskService ts = new TaskService())
+                var proc = new Process
                 {
-                    // Create a new task definition and assign properties
-                    TaskDefinition td = ts.NewTask();
-                    td.Settings.Enabled = false;
-                    td.RegistrationInfo.Description = Settings.Default.TaskDescription;
-                    td.Principal.RunLevel = TaskRunLevel.LUA;
-                    td.Principal.UserId = WindowsIdentity.GetCurrent().Name;
-                    //td.Principal.LogonType = TaskLogonType.Password;
-                    td.Settings.MultipleInstances = TaskInstancesPolicy.IgnoreNew;
-                    td.Settings.Hidden = true;
-
-                    // Create a trigger that will fire the task at this time every other day
-                    var dt = new DailyTrigger();
-                    dt.DaysInterval = 1;
-                    dt.Repetition.Duration = TimeSpan.FromDays(1);
-                    dt.Repetition.Interval = TimeSpan.FromMinutes(Settings.Default.RunInterval);
-
-                    // Create an action that will launch Notepad whenever the trigger fires
-                    td.Actions.Add(new ExecAction(Assembly.GetExecutingAssembly().Location, "-s"));
-
-                    // Register the task in the root folder
-                    var newTask = ts.RootFolder.RegisterTaskDefinition(Settings.Default.TaskName, td);
-
-                    var taskMessage = string.Empty;
-                    var proc = new Process
+                    StartInfo = new ProcessStartInfo
                     {
-                        StartInfo = new ProcessStartInfo
-                        {
-                            FileName = "schtasks.exe",
-                            Arguments = $"/change /TN \"{Settings.Default.TaskName}\" /RU {WindowsIdentity.GetCurrent().Name} /RP {PasswordTextBox.Password}",
-                            UseShellExecute = false,
-                            RedirectStandardOutput = true,
-                            CreateNoWindow = true
-                        }
-                    };
-
-                    proc.Start();
-                    while (!proc.StandardOutput.EndOfStream)
-                    {
-                        taskMessage += proc.StandardOutput.ReadLine();
-                        // do something with line
+                        FileName = $"schtasks.exe /Create /RU \"NT AUTHORITY\\SYSTEM\" /SC DAILY /TN \"{ Settings.Default.TaskName }\" /TR \"{Assembly.GetExecutingAssembly().Location} -s\" /RI {Settings.Default.RunInterval} /DU 24:00 /RL HIGHEST",
+                        //Arguments = $"/Create /RU \"NT AUTHORITY\\SYSTEM\" /SC DAILY /TN \"{ Settings.Default.TaskName }\" /TR \"{Assembly.GetExecutingAssembly().Location} -s\" /RI {Settings.Default.RunInterval} /DU 24:00 /RL HIGHEST",
+                        UseShellExecute = true,
+                        //RedirectStandardOutput = true,
+                        //CreateNoWindow = true,
+                        //RedirectStandardError = true,
+                        Verb = "runas"
                     }
+                };
 
-                    if (!taskMessage.StartsWith("SUCCESS"))
-                    {
-                        throw new Exception(taskMessage);
-                    }
+                proc.Start();
+                //taskMessage = proc.StandardOutput.ReadToEnd();
+                //taskError = proc.StandardError.ReadToEnd();
+                proc.WaitForExit();
 
-                    CreateTaskResponse.Text = $"Schedule successfully created: '{newTask.Name}'";
-                    PasswordTextBox.Clear();
-                }
+                if (!taskMessage.StartsWith("SUCCESS") || !string.IsNullOrWhiteSpace(taskError))
+                    throw new Exception(taskMessage);
+
+                CreateTaskResponse.Text = taskMessage;
             }
             catch (Exception ex)
             {
-                CreateTaskResponse.Text = ex.Message;
+                CreateTaskResponse.Text = string.IsNullOrWhiteSpace(ex.Message) ? string.IsNullOrWhiteSpace(taskError) ? "unkown error" : taskError : ex.Message;
             }
             finally
             {
                 CreateTaskButton.IsEnabled = true;
             }
+        }
+
+        private void NextButtonClick(object sender, RoutedEventArgs e)
+        {
+            if (Tabs.SelectedIndex != Tabs.Items.Count - 1)
+                Tabs.SelectedIndex++;
+
+        }
+        private void BackButtonClick(object sender, RoutedEventArgs e)
+        {
+            if (Tabs.SelectedIndex != 0)
+                Tabs.SelectedIndex--;
         }
     }
 }

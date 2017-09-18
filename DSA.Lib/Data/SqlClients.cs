@@ -11,7 +11,7 @@ using System.Text;
 
 namespace DSA.Lib.Data
 {
-    public abstract class SqlServerClient
+    public class SqlServerClient
     {
         private string DbName;
         private string ServerName;
@@ -32,7 +32,7 @@ namespace DSA.Lib.Data
             ConnectionString = connectionString;
         }
 
-        protected string GetJson(string query)
+        public DataTable GetData(string query)
         {
             var list = new List<JObject>();
             using (var conn = GetConnection())
@@ -49,29 +49,7 @@ namespace DSA.Lib.Data
                     using (var da = new SqlDataAdapter(cmd))
                         da.Fill(table);
 
-                    return JsonConvert.SerializeObject(table, Formatting.None);
-                }
-            }
-        }
-
-        protected string GetCsv(string query)
-        {
-            var list = new List<JObject>();
-            using (var conn = GetConnection())
-            {
-                using (var cmd = new SqlCommand
-                {
-                    CommandTimeout = 300,
-                    Connection = conn,
-                    CommandType = CommandType.Text,
-                    CommandText = query
-                })
-                {
-                    var table = new DataTable();
-                    using (var da = new SqlDataAdapter(cmd))
-                        da.Fill(table);
-
-                    return table.toCsv();
+                    return table;
                 }
             }
         }
@@ -103,7 +81,7 @@ namespace DSA.Lib.Data
             {
                 for (int i = 0; i < datatable.Columns.Count; i++)
                 {
-                    sb.Append(dr[i].ToString());
+                    sb.Append(dr[i].ToString().Replace("\t", "    "));
 
                     if (i < datatable.Columns.Count - 1)
                         sb.Append(seperator);
@@ -112,7 +90,9 @@ namespace DSA.Lib.Data
             }
             return sb.ToString();
         }
+        public static string toJson(this DataTable datatable, Formatting formatting = Formatting.None, char seperator = '\t')
+        {
+            return JsonConvert.SerializeObject(datatable, formatting);
+        }
     }
-
-
 }

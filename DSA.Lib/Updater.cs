@@ -5,6 +5,8 @@ using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
 using System.Collections.Specialized;
+using System.Data;
+using System.Globalization;
 using System.Linq;
 using System.Net.Http;
 using System.Net.Http.Headers;
@@ -16,43 +18,72 @@ namespace DSA.Lib
     public class Updater
     {
         public UpdaterOpts Opts { get; set; }
-        public DateTime lastUpdateOn { get; private set; }
-
-        private const int MaxLimit = 10000;
+        public DateTime LastUpdateOn { get; private set; }
 
         public Updater(UpdaterOpts opts)
         {
             Opts = opts;
-            lastUpdateOn = GetLastUpdatedOn();
-            Opts.Limit = Opts.Limit > MaxLimit ? MaxLimit : Opts.Limit;
+            LastUpdateOn = GetLastUpdatedOn();
         }
 
-        public async Task<Guid> Run()
+        public IEnumerable<Guid> Run()
         {
-            var unitsCsv = GetUnits();
-            var incidentCsv = GetIncidents();
-            var units = Encoding.UTF8.GetBytes(unitsCsv);
-            var incidents = Encoding.UTF8.GetBytes(incidentCsv);
+            var transactionIds = new List<Guid>();
 
-            MultipartFormDataContent form = new MultipartFormDataContent();
+            var incidents = GetIncidents();
+            var units = GetUnits();
 
-            form.Add(new StringContent(Opts.DataType), "\"type\"");
-            form.Add(new ByteArrayContent(incidents, 0, incidents.Length), "\"incidents\"", "incidents.csv");
-            form.Add(new ByteArrayContent(units, 0, units.Length), "\"units\"", "units.csv");
+            var incidentsTotal = 0;
+            if (incidents.Rows.Count > 0) incidentsTotal = int.Parse(incidents.Rows[0]["total"].ToString());
 
-            var resultString = await Http.Post(Opts.DataUrl, form, GetAuthHeader());
-            var result = JObject.Parse(resultString);
-            return Guid.Parse(result["transactionId"]?.ToString());
+            var unitsTotal = 0;
+            if (units.Rows.Count > 0) unitsTotal = int.Parse(units.Rows[0]["total"].ToString());
+
+            for (var i = 0; i < (int)Math.Ceiling((double)Math.Max(incidentsTotal, unitsTotal) / (double)Opts.Limit); i++)
+            {
+                if (i > 0)
+                {
+                    incidents = GetIncidents(i * Opts.Limit);
+                    units = GetUnits(i * Opts.Limit);
+                }
+
+                incidents.Columns.Remove("total");
+                units.Columns.Remove("total");
+
+                var incidentsBytes = Encoding.UTF8.GetBytes(incidents.toCsv());
+                var unitsBytes = Encoding.UTF8.GetBytes(units.toCsv());
+
+                MultipartFormDataContent form = new MultipartFormDataContent();
+
+                form.Add(new StringContent(Opts.DataType), "\"type\"");
+                form.Add(new ByteArrayContent(incidentsBytes, 0, incidentsBytes.Length), "\"incidents\"", "incidents.csv");
+                form.Add(new ByteArrayContent(unitsBytes, 0, unitsBytes.Length), "\"units\"", "units.csv");
+
+                var httpResponse = Http.Post(Opts.DataUrl, form, GetAuthHeader());
+                var readContentTask = httpResponse.Content.ReadAsStringAsync();
+                readContentTask.Wait();
+                var content = readContentTask.Result;
+
+                if (!httpResponse.IsSuccessStatusCode)
+                {
+                    throw new Exception($"{httpResponse.StatusCode} - {content}");
+                }
+
+                var result = JObject.Parse(content);
+                transactionIds.Add(Guid.Parse(result["transactionId"]?.ToString()));
+            }
+
+            return transactionIds;
         }
 
-        private string GetIncidents()
+        private DataTable GetIncidents(int offset = 0)
         {
-            return new IncidentResponseClient(Opts.ConnectionString, Opts.UnitsQuery.Replace("{{LIMIT}}", Opts.Limit.ToString()).Replace("{{LASTUPDATEDDATETIME}}", lastUpdateOn.ToString())).GetCsv();
+            return new SqlServerClient(Opts.ConnectionString).GetData(ReplacePlaceQueryPlaceholders(Opts.IncidentsQuery, offset));
         }
 
-        private string GetUnits()
+        private DataTable GetUnits(int offset = 0)
         {
-            return new IncidentResponseClient(Opts.ConnectionString, Opts.UnitsQuery.Replace("{{LIMIT}}", Opts.Limit.ToString()).Replace("{{LASTUPDATEDDATETIME}}", lastUpdateOn.ToString())).GetCsv();
+            return new SqlServerClient(Opts.ConnectionString).GetData(ReplacePlaceQueryPlaceholders(Opts.UnitsQuery, offset));
         }
 
         private AuthenticationHeaderValue GetAuthHeader()
@@ -74,27 +105,34 @@ namespace DSA.Lib
         {
             var result = await Task.Run(() =>
             {
-                return new IncidentResponseClient(Opts.ConnectionString, "Select 'Success!' as message;").GetJson();
+                return new SqlServerClient(Opts.ConnectionString).GetData("Select 'Success!' as message;").toJson(Formatting.Indented);
             });
             return result;
         }
 
-        public async Task<string> TestIncidentsQuery()
+        public async Task<Tuple<string, int>> TestIncidentsQuery()
         {
             var result = await Task.Run(() =>
             {
-                return GetIncidents();
+                var data = GetIncidents();
+                return new Tuple<string, int>(data.toJson(Formatting.Indented), data.Rows.Count);
             });
             return result;
         }
 
-        public async Task<string> TestUnitsQuery()
+        public async Task<Tuple<string, int>> TestUnitsQuery()
         {
             var result = await Task.Run(() =>
             {
-                return GetUnits();
+                var data = GetUnits();
+                return new Tuple<string, int>(data.toJson(Formatting.Indented), data.Rows.Count);
             });
             return result;
+        }
+
+        private string ReplacePlaceQueryPlaceholders(string query, int page)
+        {
+            return query.Replace("{{PAGE}}", page.ToString()).Replace("{{LASTUPDATEDDATETIME}}", LastUpdateOn.ToString("yyyy-MM-dd HH:mm:ss", CultureInfo.InvariantCulture));
         }
 
         private DateTime GetLastUpdatedOn()

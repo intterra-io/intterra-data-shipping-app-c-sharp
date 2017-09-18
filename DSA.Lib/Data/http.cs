@@ -30,7 +30,7 @@ namespace DSA.Lib.Data
             return response;
         }
 
-        public static async Task<string> Post(string uri, MultipartFormDataContent form, AuthenticationHeaderValue authorization = null)
+        public static HttpResponseMessage Post(string uri, MultipartFormDataContent form, AuthenticationHeaderValue authorization = null)
         { 
             using (var httpClient = new HttpClient())
             {
@@ -38,8 +38,9 @@ namespace DSA.Lib.Data
                 {
                     httpClient.DefaultRequestHeaders.Authorization = authorization;
                 }
-                var response = await httpClient.PostAsync(uri, form);
-                return response.Content.ReadAsStringAsync().Result;
+                var response = httpClient.PostAsync(uri, form);
+                response.Wait();
+                return response.Result;
             }
         }
 

@@ -73,32 +73,6 @@ namespace DSA.App.Properties {
         
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("SELECT TOP {{LIMIT}} * FROM dbo.incident_summary WHERE last_updated_rms > \'{{LAST" +
-            "UPDATEDDATETIME}}\';")]
-        public string AnalyticsIncidentsQuery {
-            get {
-                return ((string)(this["AnalyticsIncidentsQuery"]));
-            }
-            set {
-                this["AnalyticsIncidentsQuery"] = value;
-            }
-        }
-        
-        [global::System.Configuration.UserScopedSettingAttribute()]
-        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("SELECT TOP {{LIMIT}} * FROM dbo.unit_summary WHERE last_updated_rms &gt; \'{{LASTU" +
-            "PDATEDDATETIME}}\';")]
-        public string AnalyticsUnitsQuery {
-            get {
-                return ((string)(this["AnalyticsUnitsQuery"]));
-            }
-            set {
-                this["AnalyticsUnitsQuery"] = value;
-            }
-        }
-        
-        [global::System.Configuration.UserScopedSettingAttribute()]
-        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
         [global::System.Configuration.DefaultSettingValueAttribute("")]
         public string Agency {
             get {
@@ -130,18 +104,6 @@ namespace DSA.App.Properties {
             }
             set {
                 this["ApiKeySecret"] = value;
-            }
-        }
-        
-        [global::System.Configuration.UserScopedSettingAttribute()]
-        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("10000")]
-        public int Limit {
-            get {
-                return ((int)(this["Limit"]));
-            }
-            set {
-                this["Limit"] = value;
             }
         }
         
@@ -191,6 +153,114 @@ namespace DSA.App.Properties {
             }
             set {
                 this["TaskDescription"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("*")]
+        public string AnalyticsIncidentsSelect {
+            get {
+                return ((string)(this["AnalyticsIncidentsSelect"]));
+            }
+            set {
+                this["AnalyticsIncidentsSelect"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("dbo.incident_summary")]
+        public string AnalyticsIncidentsFrom {
+            get {
+                return ((string)(this["AnalyticsIncidentsFrom"]));
+            }
+            set {
+                this["AnalyticsIncidentsFrom"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("last_updated_rms > \'{{LASTUPDATEDDATETIME}}\'")]
+        public string AnalyticsIncidentsWhere {
+            get {
+                return ((string)(this["AnalyticsIncidentsWhere"]));
+            }
+            set {
+                this["AnalyticsIncidentsWhere"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("incident_datetime")]
+        public string AnalyticsIncidentsOrderBy {
+            get {
+                return ((string)(this["AnalyticsIncidentsOrderBy"]));
+            }
+            set {
+                this["AnalyticsIncidentsOrderBy"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("*")]
+        public string AnalyticsUnitsSelect {
+            get {
+                return ((string)(this["AnalyticsUnitsSelect"]));
+            }
+            set {
+                this["AnalyticsUnitsSelect"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("dbo.unit_summary")]
+        public string AnalyticsUnitsFrom {
+            get {
+                return ((string)(this["AnalyticsUnitsFrom"]));
+            }
+            set {
+                this["AnalyticsUnitsFrom"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("last_updated_rms > \'{{LASTUPDATEDDATETIME}}\'")]
+        public string AnalyticsUnitsWhere {
+            get {
+                return ((string)(this["AnalyticsUnitsWhere"]));
+            }
+            set {
+                this["AnalyticsUnitsWhere"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("last_updated_rms")]
+        public string AnalyticsUnitsOrderBy {
+            get {
+                return ((string)(this["AnalyticsUnitsOrderBy"]));
+            }
+            set {
+                this["AnalyticsUnitsOrderBy"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("50")]
+        public int Limit {
+            get {
+                return ((int)(this["Limit"]));
+            }
+            set {
+                this["Limit"] = value;
             }
         }
     }
