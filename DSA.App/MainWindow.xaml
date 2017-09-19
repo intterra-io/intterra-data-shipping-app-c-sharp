@@ -5,9 +5,9 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:DSA.App"
         mc:Ignorable="d"
-        Title="Intterra Data Shipping App" Height="600" Width="800" Background="#1E1E1E" >
+        Title="Intterra Data Shipping App" Height="600" Width="800" Background="White" >
     <Grid>
-        <TabControl x:Name="Tabs" Background="#1E1E1E" Margin="0 0 0 50" BorderThickness="0 1 0 0">
+        <TabControl x:Name="Tabs" Background="White" Margin="0 0 0 50" BorderThickness="0 1 0 0">
             <TabItem Header="Authentication" >
                 <ScrollViewer VerticalScrollBarVisibility="Auto">
                     <StackPanel>
@@ -26,7 +26,7 @@
                     <StackPanel>
                         <Label Content="Data" Style="{StaticResource DarkTitle}"/>
                         <Label Content="SQL Server Connection" Style="{StaticResource DarkLabel}"/>
-                        <TextBox Text="{Binding AnalyticsConnectionString, Mode=TwoWay}" Style="{StaticResource InputTextBox}" />
+                        <TextBox Text="{Binding ConnectionString, Mode=TwoWay}" Style="{StaticResource InputTextBox}" />
                         <Label Content="Batch Max Record Count" Style="{StaticResource DarkLabel}"/>
                         <TextBox Text="{Binding Limit, Mode=TwoWay}" Style="{StaticResource InputTextBox}" />
                         <Button x:Name="TestDataConnectivityButton" Content="Test Data Connectivity" Click="TestDataConnectivityClick" Style="{StaticResource DarkButton}" HorizontalAlignment="Center" />
@@ -41,19 +41,19 @@
 
                         <DockPanel Margin="10 0 0 5 ">
                             <Label Content="SELECT" Style="{StaticResource CodeLabel}" />
-                            <TextBox Text="{Binding AnalyticsIncidentsSelect, Mode=TwoWay}" Style="{StaticResource InputTextBox}" />
+                            <TextBox Text="{Binding IncidentsSelect, Mode=TwoWay}" Style="{StaticResource InputTextBox}" />
                         </DockPanel>
                         <DockPanel Margin="10 0 0 5 ">
                             <Label Content="FROM" Style="{StaticResource CodeLabel}" />
-                            <TextBox Text="{Binding AnalyticsIncidentsFrom, Mode=TwoWay}" Style="{StaticResource InputTextBox}" />
+                            <TextBox Text="{Binding IncidentsFrom, Mode=TwoWay}" Style="{StaticResource InputTextBox}" />
                         </DockPanel>
                         <DockPanel Margin="10 0 0 5 ">
                             <Label Content="WHERE" Style="{StaticResource CodeLabel}" />
-                            <TextBox Text="{Binding AnalyticsIncidentsWhere, Mode=TwoWay}" Style="{StaticResource InputTextBox}" />
+                            <TextBox Text="{Binding IncidentsWhere, Mode=TwoWay}" Style="{StaticResource InputTextBox}" />
                         </DockPanel>
                         <DockPanel Margin="10 0 0 5 ">
                             <Label Content="ORDER BY" Style="{StaticResource CodeLabel}" />
-                            <TextBox Text="{Binding AnalyticsIncidentsOrderBy, Mode=TwoWay}" Style="{StaticResource InputTextBox}" />
+                            <TextBox Text="{Binding IncidentsOrderBy, Mode=TwoWay}" Style="{StaticResource InputTextBox}" />
                         </DockPanel>
 
                         <Button x:Name="TestIncidentsQueryButton" Content="Test Incident Query" Click="TestIncidentsQueryClick" Style="{StaticResource DarkButton}" HorizontalAlignment="Center" />
@@ -67,19 +67,19 @@
                         <Label Content="Units Query" Style="{StaticResource DarkTitle}"/>
                         <DockPanel Margin="10 0 0 5 ">
                             <Label Content="SELECT" Style="{StaticResource CodeLabel}" />
-                            <TextBox Text="{Binding AnalyticsUnitsSelect, Mode=TwoWay}" Style="{StaticResource InputTextBox}" />
+                            <TextBox Text="{Binding UnitsSelect, Mode=TwoWay}" Style="{StaticResource InputTextBox}" />
                         </DockPanel>
                         <DockPanel Margin="10 0 0 5 ">
                             <Label Content="FROM" Style="{StaticResource CodeLabel}" />
-                            <TextBox Text="{Binding AnalyticsUnitsFrom, Mode=TwoWay}" Style="{StaticResource InputTextBox}" />
+                            <TextBox Text="{Binding UnitsFrom, Mode=TwoWay}" Style="{StaticResource InputTextBox}" />
                         </DockPanel>
                         <DockPanel Margin="10 0 0 5 ">
                             <Label Content="WHERE" Style="{StaticResource CodeLabel}" />
-                            <TextBox Text="{Binding AnalyticsUnitsWhere, Mode=TwoWay}" Style="{StaticResource InputTextBox}" />
+                            <TextBox Text="{Binding UnitsWhere, Mode=TwoWay}" Style="{StaticResource InputTextBox}" />
                         </DockPanel>
                         <DockPanel Margin="10 0 0 5 ">
                             <Label Content="ORDER BY" Style="{StaticResource CodeLabel}" />
-                            <TextBox Text="{Binding AnalyticsUnitsOrderBy, Mode=TwoWay}" Style="{StaticResource InputTextBox}" />
+                            <TextBox Text="{Binding UnitsOrderBy, Mode=TwoWay}" Style="{StaticResource InputTextBox}" />
                         </DockPanel>
 
                         <Button x:Name="TestUnitsQueryButton" Content="Test Units Query" Click="TestUnitsQueryClick" Style="{StaticResource DarkButton}" HorizontalAlignment="Center" />
@@ -103,8 +103,6 @@
                         <Label Content="Task Scheduler" Style="{StaticResource DarkTitle}"/>
                         <Label Content="Interval in Minutes" Style="{StaticResource DarkLabel}"/>
                         <TextBox Text="{Binding RunInterval, Mode=TwoWay}" Style="{StaticResource InputTextBox}" />
-                        <Label Content="Password for Local User Account" Style="{StaticResource DarkLabel}"/>
-                        <PasswordBox x:Name="PasswordTextBox" Background="#0F0F0F" Foreground="LightGray" BorderBrush="Gray" Margin="10 0" />
                         <Button x:Name="CreateTaskButton" Content="Schedule Task" Click="CreateTaskClick" Style="{StaticResource DarkButton}" HorizontalAlignment="Center" />
                         <TextBox x:Name="CreateTaskResponse" Style="{StaticResource ResultTextBox}" />
                     </StackPanel>

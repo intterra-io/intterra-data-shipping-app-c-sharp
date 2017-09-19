@@ -8,45 +8,45 @@
             <Setter Property="FontSize" Value="16" />
             <Setter Property="Padding" Value="10" />
             <Setter Property="Margin" Value="10" />
-            <Setter Property="Background" Value="#333" />
-            <Setter Property="Foreground" Value="LightGray" />
-            <Style.Triggers>
+            <!--<Setter Property="Background" Value="#333" />-->
+            <!--<Setter Property="Foreground" Value="LightGray" />-->
+            <!--<Style.Triggers>
                 <Trigger Property="IsMouseOver" Value="true">
                     <Setter Property="Foreground" Value="Gray" />
                     <Setter Property="Background" Value="#444" />
                 </Trigger>
-            </Style.Triggers>
+            </Style.Triggers>-->
         </Style>
         <Style x:Key="ResultTextBox" TargetType="TextBox">
             <Setter Property="TextWrapping" Value="Wrap" />
             <Setter Property="FontFamily" Value="Courier New" />
-            <Setter Property="Foreground" Value="LightGray" />
-            <Setter Property="Background" Value="#333" />
+            <!--<Setter Property="Foreground" Value="LightGray" />-->
+            <!--<Setter Property="Background" Value="#333" />-->
             <Setter Property="Height" Value="100" />
             <Setter Property="Margin" Value="10 0" />
-            <Setter Property="BorderBrush" Value="Gray" />
+            <!--<Setter Property="BorderBrush" Value="Gray" />-->
             <Setter Property="VerticalScrollBarVisibility" Value="Auto" />
             <Setter Property="IsReadOnly" Value="True" />
         </Style>
         <Style x:Key="InputTextBox" TargetType="TextBox">
             <Setter Property="TextWrapping" Value="NoWrap" />
-            <Setter Property="Foreground" Value="LightGray" />
-            <Setter Property="Background" Value="#0F0F0F" />
-            <Setter Property="BorderBrush" Value="Gray" />
+            <!--<Setter Property="Foreground" Value="LightGray" />-->
+            <!--<Setter Property="Background" Value="#0F0F0F" />-->
+            <!--<Setter Property="BorderBrush" Value="Gray" />-->
             <Setter Property="Margin" Value="10 0" />
         </Style>
         <Style x:Key="DarkLabel" TargetType="Label">
-            <Setter Property="Foreground" Value="Gray" />
+            <!--<Setter Property="Foreground" Value="Gray" />-->
             <Setter Property="Margin" Value="10 0" />
         </Style>
         <Style x:Key="CodeLabel" TargetType="Label">
-            <Setter Property="Foreground" Value="Gray" />
+            <!--<Setter Property="Foreground" Value="Gray" />-->
             <Setter Property="Margin" Value="10 0" />
             <Setter Property="FontFamily" Value="Courier New" />
             <Setter Property="Width" Value="75" />
         </Style>
         <Style x:Key="DarkTitle" TargetType="Label">
-            <Setter Property="Foreground" Value="Gray" />
+            <!--<Setter Property="Foreground" Value="Gray" />-->
             <Setter Property="FontSize" Value="24" />
         </Style>
     </Application.Resources>

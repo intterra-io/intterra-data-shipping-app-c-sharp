@@ -23,11 +23,11 @@ namespace DSA.Lib
         public Updater(UpdaterOpts opts)
         {
             Opts = opts;
-            LastUpdateOn = GetLastUpdatedOn();
         }
 
         public IEnumerable<Guid> Run()
         {
+            LastUpdateOn = GetLastUpdatedOn();
             var transactionIds = new List<Guid>();
 
             var incidents = GetIncidents();
@@ -55,7 +55,7 @@ namespace DSA.Lib
 
                 MultipartFormDataContent form = new MultipartFormDataContent();
 
-                form.Add(new StringContent(Opts.DataType), "\"type\"");
+                form.Add(new StringContent("analytics"), "\"type\"");
                 form.Add(new ByteArrayContent(incidentsBytes, 0, incidentsBytes.Length), "\"incidents\"", "incidents.csv");
                 form.Add(new ByteArrayContent(unitsBytes, 0, unitsBytes.Length), "\"units\"", "units.csv");
 
@@ -78,12 +78,14 @@ namespace DSA.Lib
 
         private DataTable GetIncidents(int offset = 0)
         {
-            return new SqlServerClient(Opts.ConnectionString).GetData(ReplacePlaceQueryPlaceholders(Opts.IncidentsQuery, offset));
+            LastUpdateOn = GetLastUpdatedOn();
+            return new SqlServerClient(Opts.ConnectionString).GetData(Opts.GetIncidentsQuery(LastUpdateOn, offset));
         }
 
         private DataTable GetUnits(int offset = 0)
         {
-            return new SqlServerClient(Opts.ConnectionString).GetData(ReplacePlaceQueryPlaceholders(Opts.UnitsQuery, offset));
+            LastUpdateOn = GetLastUpdatedOn();
+            return new SqlServerClient(Opts.ConnectionString).GetData(Opts.GetUnitsQuery(LastUpdateOn, offset));
         }
 
         private AuthenticationHeaderValue GetAuthHeader()
@@ -130,16 +132,11 @@ namespace DSA.Lib
             return result;
         }
 
-        private string ReplacePlaceQueryPlaceholders(string query, int page)
-        {
-            return query.Replace("{{PAGE}}", page.ToString()).Replace("{{LASTUPDATEDDATETIME}}", LastUpdateOn.ToString("yyyy-MM-dd HH:mm:ss", CultureInfo.InvariantCulture));
-        }
-
         private DateTime GetLastUpdatedOn()
         {
             var result = JObject.Parse(Http.Post(Opts.LastDatetimeUrl, new NameValueCollection()
             {
-                { "type", Opts.DataType },
+                { "type", "analytics" },
                 { "apiKey", Opts.ApiKey },
                 { "apiKeySecret", Opts.ApiKeySecret }
             }));

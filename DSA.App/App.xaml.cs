@@ -1,4 +1,5 @@
-﻿using DSA.Lib.Data;
+﻿using DSA.Lib;
+using DSA.Lib.Data;
 using System;
 using System.Collections.Generic;
 using System.Configuration;
@@ -24,7 +25,8 @@ namespace DSA.App
             {
                 try
                 {
-                    var batches = Utility.GetUpdater().Run();
+                    var opts = SettingsClient.Get();
+                    var batches = new Updater(opts).Run();
                     LogClient.Log($"Successfully submitted {batches.Count()} batch(es): {string.Join(", ", batches.ToArray())}");
                 }
                 catch (Exception ex)
@@ -40,5 +42,11 @@ namespace DSA.App
                 window.Show();
             }
         }
+    }
+
+    public static class Constants
+    {
+        public const string OrgName = "Intterra";
+        public const string AppName = "DSA";
     }
 }

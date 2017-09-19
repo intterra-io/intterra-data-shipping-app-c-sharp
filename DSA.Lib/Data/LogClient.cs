@@ -9,7 +9,6 @@ namespace DSA.Lib.Data
 {
     public static class LogClient
     {
-
         const string OrgName = "Intterra";
         const string AppName = "DSA";
 
@@ -17,17 +16,17 @@ namespace DSA.Lib.Data
         {
             try
             {
-                if (!Directory.Exists(Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), OrgName)))
+                if (!Directory.Exists(Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.CommonApplicationData), OrgName)))
                 {
-                    Directory.CreateDirectory(Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), OrgName));
+                    Directory.CreateDirectory(Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.CommonApplicationData), OrgName));
                 }
-                if (!Directory.Exists(Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), OrgName, AppName)))
+                if (!Directory.Exists(Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.CommonApplicationData), OrgName, AppName)))
                 {
-                    Directory.CreateDirectory(Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), OrgName, AppName));
+                    Directory.CreateDirectory(Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.CommonApplicationData), OrgName, AppName));
                 }
 
                 // Rotate logs
-                var logDirectory = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), OrgName, AppName);
+                var logDirectory = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.CommonApplicationData), OrgName, AppName);
 
                 foreach (var item in Directory.GetFiles(logDirectory, "*.log", SearchOption.TopDirectoryOnly)
                     .Select(x => new FileInfo(x))
@@ -59,7 +58,7 @@ namespace DSA.Lib.Data
         {
             try
             {
-                File.AppendAllLines(Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), OrgName, AppName, GetLogFileName()), new[] { $"{DateTime.Now}\t{level}\t{message}" });
+                File.AppendAllLines(Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.CommonApplicationData), OrgName, AppName, GetLogFileName()), new[] { $"{DateTime.Now}\t{level}\t{message}" });
             }
             catch (Exception)
             {
