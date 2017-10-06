@@ -95,7 +95,10 @@ namespace DSA.Lib.Models
 
         private string BuildQuery(string select, string from, string where, string orderBy)
         {
-            return $"SELECT {select}, COUNT(*) OVER() as total FROM {from} WHERE {where} ORDER BY {orderBy} OFFSET {{{{PAGE}}}} ROWS FETCH NEXT {Limit} ROWS ONLY";
+            //return $"SELECT {select}, COUNT(*) OVER() as total FROM {from} WHERE {where} ORDER BY {orderBy} OFFSET {{{{PAGE}}}} ROWS FETCH NEXT {Limit} ROWS ONLY";
+            where = string.IsNullOrWhiteSpace(where) ? "1=1" : where;
+            return $"SELECT * FROM ( SELECT {select}, ROW_NUMBER() OVER (ORDER BY {orderBy}) AS seqence, COUNT(*) OVER () as total FROM {from} WHERE {where} ) as x WHERE seqence BETWEEN {{{{PAGE}}}} AND {{{{PAGE}}}} + {Limit}";
+
         }
     }
 }

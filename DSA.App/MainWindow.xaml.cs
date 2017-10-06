@@ -217,11 +217,13 @@ namespace DSA.App
                 Tabs.SelectedIndex++;
 
         }
+
         private void BackButtonClick(object sender, RoutedEventArgs e)
         {
             if (Tabs.SelectedIndex != 0)
                 Tabs.SelectedIndex--;
         }
+
         private bool IsAdministrator()
         {
             return (new WindowsPrincipal(WindowsIdentity.GetCurrent()))
