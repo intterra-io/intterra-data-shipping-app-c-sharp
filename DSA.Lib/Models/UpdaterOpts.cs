@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Newtonsoft.Json;
+using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
@@ -8,12 +9,26 @@ namespace DSA.Lib.Models
 {
     public class UpdaterOpts
     {
+        public string CurrentProfileName { get; set; } = "analytics";
+        [JsonIgnore]
+        public UpdaterProfile CurrentProfile { get; set; }
+        public IReadOnlyList<string> DbDrivers { get; } = new List<string>(new[] { "mssql", "odbc" }).AsReadOnly();
+        public Dictionary<string, UpdaterProfile> Profiles { get; } = new Dictionary<string, UpdaterProfile>();
+    }
+
+    public class UpdaterProfile
+    {
+        public string Name { get; set; }
         public string LastDatetimeUrl { get; set; }
         public string DataUrl { get; set; }
         public string TestUrl { get; set; }
 
         public int RunInterval { get; set; }
+        public string RunIntervalTimeUnit { get; set; }
+        [JsonIgnore]
+        public DateTime RunStartTime { get; set; } = DateTime.Now;
 
+        public string Driver { get; set; }
         public string ConnectionString { get; set; }
         public string ApiKey { get; set; }
         public string ApiKeySecret { get; set; }
@@ -30,75 +45,46 @@ namespace DSA.Lib.Models
         public string UnitsWhere { get; set; }
         public string UnitsOrderBy { get; set; }
 
-        public UpdaterOpts()
-        {
-#if DEBUG
-            LastDatetimeUrl = "http://localhost:8000/v1/data/get-last-datetime";
-            DataUrl = "http://localhost:8000/v1/data/add";
-            TestUrl = "http://localhost:8000/v1/keys/test";
-
-            RunInterval = 60;
-
-            IncidentsSelect = "*";
-            IncidentsFrom = "dbo.incident_summary";
-            IncidentsWhere = "last_updated_rms > '{{LASTUPDATEDDATETIME}}'";
-            IncidentsOrderBy = "incident_datetime";
-
-            UnitsSelect = "*";
-            UnitsFrom = "dbo.unit_summary";
-            UnitsWhere = "last_updated_rms > '{{LASTUPDATEDDATETIME}}'";
-            UnitsOrderBy = "last_updated_rms";
-
-            ConnectionString = @"Data Source=.\SQLEXPRESS;Initial Catalog=sandbox;Integrated Security=true";
-            ApiKey = "";
-            ApiKeySecret = "";
-            Limit = 50;
-#else
-            LastDatetimeUrl = "https://dc.intterragroup.com/v1/data/get-last-datetime";
-            DataUrl = "https://dc.intterragroup.com/v1/data/add";
-            TestUrl = "https://dc.intterragroup.com/v1/keys/test";
-
-            RunInterval = 60;
-
-            IncidentsSelect = "*";
-            IncidentsFrom = "dbo.incidents";
-            IncidentsWhere = "last_updated_rms > '{{LASTUPDATEDDATETIME}}'";
-            IncidentsOrderBy = "incident_datetime";
-
-            UnitsSelect = "*";
-            UnitsFrom = "dbo.units";
-            UnitsWhere = "last_updated_rms > '{{LASTUPDATEDDATETIME}}'";
-            UnitsOrderBy = "last_updated_rms";
-
-            ConnectionString = "Data Source=ServerName;Initial Catalog=DatabaseName;User Id=userid;Password=password";
-            ApiKey = "";
-            ApiKeySecret = "";
-            Limit = 10000;
-#endif
-        }
-
-
-        public string GetIncidentsQuery(DateTime lastUpdatedOn, int page = 0)
+        public string GetIncidentsQuery(DateTime? lastUpdatedOn, int page = 0)
         {
             return ReplacePlaceQueryPlaceholders(BuildQuery(IncidentsSelect, IncidentsFrom, IncidentsWhere, IncidentsOrderBy), lastUpdatedOn, page);
         }
 
-        public string GetUnitsQuery(DateTime lastUpdatedOn, int page = 0)
+        public string GetUnitsQuery(DateTime? lastUpdatedOn, int page = 0)
         {
             return ReplacePlaceQueryPlaceholders(BuildQuery(UnitsSelect, UnitsFrom, UnitsWhere, UnitsOrderBy), lastUpdatedOn, page);
         }
 
-        private string ReplacePlaceQueryPlaceholders(string query, DateTime lastUpdatedOn, int page)
+        private string ReplacePlaceQueryPlaceholders(string query, DateTime? lastUpdatedOn, int page)
         {
-            return query.Replace("{{PAGE}}", page.ToString()).Replace("{{LASTUPDATEDDATETIME}}", lastUpdatedOn.ToString("yyyy-MM-dd HH:mm:ss", CultureInfo.InvariantCulture));
+            query = query.Replace("{{PAGE}}", page.ToString());
+
+            if (lastUpdatedOn != null)
+            {
+                query = query.Replace("{{LASTUPDATEDDATETIME}}", ((DateTime)lastUpdatedOn).ToString("yyyy-MM-dd HH:mm:ss", CultureInfo.InvariantCulture));
+            }
+
+            return query;
         }
 
         private string BuildQuery(string select, string from, string where, string orderBy)
         {
             //return $"SELECT {select}, COUNT(*) OVER() as total FROM {from} WHERE {where} ORDER BY {orderBy} OFFSET {{{{PAGE}}}} ROWS FETCH NEXT {Limit} ROWS ONLY";
             where = string.IsNullOrWhiteSpace(where) ? "1=1" : where;
-            return $"SELECT * FROM ( SELECT {select}, ROW_NUMBER() OVER (ORDER BY {orderBy}) AS seqence, COUNT(*) OVER () as total FROM {from} WHERE {where} ) as x WHERE seqence BETWEEN {{{{PAGE}}}} AND {{{{PAGE}}}} + {Limit}";
 
+            if (Driver == "mssql")
+            {
+                return $"SELECT * FROM ( SELECT {select}, ROW_NUMBER() OVER (ORDER BY {orderBy}) AS seqence, COUNT(*) OVER () as total FROM {from} WHERE {where} ) as x WHERE seqence BETWEEN {{{{PAGE}}}} AND {{{{PAGE}}}} + {Limit}";
+            }
+            else
+            {
+                return $"SELECT {select} FROM {from} WHERE {where}";
+            }
+        }
+
+        public bool UsesLastUpdatedDatetime()
+        {
+            return (new[] { IncidentsWhere, IncidentsOrderBy, UnitsWhere, UnitsOrderBy }).Any(x => x.Contains("{{LASTUPDATEDDATETIME}}"));
         }
     }
 }

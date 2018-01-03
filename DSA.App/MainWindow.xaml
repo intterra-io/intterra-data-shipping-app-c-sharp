@@ -8,14 +8,25 @@
         Title="Intterra Data Shipping App" Height="600" Width="800" Background="White" >
     <Grid>
         <TabControl x:Name="Tabs" Background="White" Margin="0 0 0 50" BorderThickness="0 1 0 0">
+            <TabItem Header="Profile" >
+                <ScrollViewer VerticalScrollBarVisibility="Auto">
+                    <StackPanel>
+                        <Label Content="Profile" Style="{StaticResource DarkTitle}" />
+                        <WrapPanel HorizontalAlignment="Center">
+                            <Button x:Name="ProfileSitstatButton" Content="CAD/AVL" Style="{StaticResource SegmentButton}" HorizontalAlignment="Center" Click="ToggleProfileClick" />
+                            <Button x:Name="ProfileAnalyticsButton" Content="RMS" Style="{StaticResource SegmentButton}" HorizontalAlignment="Center" Click="ToggleProfileClick" />
+                        </WrapPanel>
+                    </StackPanel>
+                </ScrollViewer>
+            </TabItem>
             <TabItem Header="Authentication" >
                 <ScrollViewer VerticalScrollBarVisibility="Auto">
                     <StackPanel>
                         <Label Content="Authentication" Style="{StaticResource DarkTitle}" />
                         <Label Content="Api Key" Style="{StaticResource DarkLabel}" />
-                        <TextBox Text="{Binding ApiKey, Mode=TwoWay}" Style="{StaticResource InputTextBox}" />
+                        <TextBox Text="{Binding CurrentProfile.ApiKey, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Style="{StaticResource InputTextBox}" />
                         <Label Content="Api Key Secret" Style="{StaticResource DarkLabel}"/>
-                        <TextBox Text="{Binding ApiKeySecret, Mode=TwoWay}" Style="{StaticResource InputTextBox}" />
+                        <TextBox Text="{Binding CurrentProfile.ApiKeySecret, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Style="{StaticResource InputTextBox}" />
                         <Button x:Name="TestApiConnectivityButton" Content="Test API Connectivity" Style="{StaticResource DarkButton}" HorizontalAlignment="Center" Click="TestApiConnectivityClick" />
                         <TextBox x:Name="TestApiConnectivityResponse" Style="{StaticResource ResultTextBox}" />
                     </StackPanel>
@@ -25,10 +36,12 @@
                 <ScrollViewer VerticalScrollBarVisibility="Auto">
                     <StackPanel>
                         <Label Content="Data" Style="{StaticResource DarkTitle}"/>
+                        <Label Content="Driver" Style="{StaticResource DarkLabel}"/>
+                        <ComboBox ItemsSource="{Binding Path=DbDrivers}" SelectedValue="{Binding Path=CurrentProfile.Driver}" Style="{StaticResource DarkCombobox}" />
                         <Label Content="SQL Server Connection" Style="{StaticResource DarkLabel}"/>
-                        <TextBox Text="{Binding ConnectionString, Mode=TwoWay}" Style="{StaticResource InputTextBox}" />
-                        <Label Content="Batch Max Record Count" Style="{StaticResource DarkLabel}"/>
-                        <TextBox Text="{Binding Limit, Mode=TwoWay}" Style="{StaticResource InputTextBox}" />
+                        <TextBox Text="{Binding CurrentProfile.ConnectionString, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Style="{StaticResource InputTextBox}" />
+                        <Label Content="Batch Max Record Count (mssql only)" Style="{StaticResource DarkLabel}"/>
+                        <TextBox Text="{Binding CurrentProfile.Limit, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Style="{StaticResource InputTextBox}" />
                         <Button x:Name="TestDataConnectivityButton" Content="Test Data Connectivity" Click="TestDataConnectivityClick" Style="{StaticResource DarkButton}" HorizontalAlignment="Center" />
                         <TextBox x:Name="TestDataConnectivityResponse" Style="{StaticResource ResultTextBox}" />
                     </StackPanel>
@@ -41,19 +54,19 @@
 
                         <DockPanel Margin="10 0 0 5 ">
                             <Label Content="SELECT" Style="{StaticResource CodeLabel}" />
-                            <TextBox Text="{Binding IncidentsSelect, Mode=TwoWay}" Style="{StaticResource InputTextBox}" />
+                            <TextBox Text="{Binding CurrentProfile.IncidentsSelect, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Style="{StaticResource InputTextBox}" />
                         </DockPanel>
                         <DockPanel Margin="10 0 0 5 ">
                             <Label Content="FROM" Style="{StaticResource CodeLabel}" />
-                            <TextBox Text="{Binding IncidentsFrom, Mode=TwoWay}" Style="{StaticResource InputTextBox}" />
+                            <TextBox Text="{Binding CurrentProfile.IncidentsFrom, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Style="{StaticResource InputTextBox}" />
                         </DockPanel>
                         <DockPanel Margin="10 0 0 5 ">
                             <Label Content="WHERE" Style="{StaticResource CodeLabel}" />
-                            <TextBox Text="{Binding IncidentsWhere, Mode=TwoWay}" Style="{StaticResource InputTextBox}" />
+                            <TextBox Text="{Binding CurrentProfile.IncidentsWhere, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Style="{StaticResource InputTextBox}" />
                         </DockPanel>
                         <DockPanel Margin="10 0 0 5 ">
                             <Label Content="ORDER BY" Style="{StaticResource CodeLabel}" />
-                            <TextBox Text="{Binding IncidentsOrderBy, Mode=TwoWay}" Style="{StaticResource InputTextBox}" />
+                            <TextBox Text="{Binding CurrentProfile.IncidentsOrderBy, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Style="{StaticResource InputTextBox}" />
                         </DockPanel>
 
                         <Button x:Name="TestIncidentsQueryButton" Content="Test Incident Query" Click="TestIncidentsQueryClick" Style="{StaticResource DarkButton}" HorizontalAlignment="Center" />
@@ -67,19 +80,19 @@
                         <Label Content="Units Query" Style="{StaticResource DarkTitle}"/>
                         <DockPanel Margin="10 0 0 5 ">
                             <Label Content="SELECT" Style="{StaticResource CodeLabel}" />
-                            <TextBox Text="{Binding UnitsSelect, Mode=TwoWay}" Style="{StaticResource InputTextBox}" />
+                            <TextBox Text="{Binding CurrentProfile.UnitsSelect, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Style="{StaticResource InputTextBox}" />
                         </DockPanel>
                         <DockPanel Margin="10 0 0 5 ">
                             <Label Content="FROM" Style="{StaticResource CodeLabel}" />
-                            <TextBox Text="{Binding UnitsFrom, Mode=TwoWay}" Style="{StaticResource InputTextBox}" />
+                            <TextBox Text="{Binding CurrentProfile.UnitsFrom, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Style="{StaticResource InputTextBox}" />
                         </DockPanel>
                         <DockPanel Margin="10 0 0 5 ">
                             <Label Content="WHERE" Style="{StaticResource CodeLabel}" />
-                            <TextBox Text="{Binding UnitsWhere, Mode=TwoWay}" Style="{StaticResource InputTextBox}" />
+                            <TextBox Text="{Binding CurrentProfile.UnitsWhere, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Style="{StaticResource InputTextBox}" />
                         </DockPanel>
                         <DockPanel Margin="10 0 0 5 ">
                             <Label Content="ORDER BY" Style="{StaticResource CodeLabel}" />
-                            <TextBox Text="{Binding UnitsOrderBy, Mode=TwoWay}" Style="{StaticResource InputTextBox}" />
+                            <TextBox Text="{Binding CurrentProfile.UnitsOrderBy, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Style="{StaticResource InputTextBox}" />
                         </DockPanel>
 
                         <Button x:Name="TestUnitsQueryButton" Content="Test Units Query" Click="TestUnitsQueryClick" Style="{StaticResource DarkButton}" HorizontalAlignment="Center" />
@@ -101,8 +114,15 @@
                 <ScrollViewer VerticalScrollBarVisibility="Auto">
                     <StackPanel>
                         <Label Content="Task Scheduler" Style="{StaticResource DarkTitle}"/>
-                        <Label Content="Interval in Minutes" Style="{StaticResource DarkLabel}"/>
-                        <TextBox Text="{Binding RunInterval, Mode=TwoWay}" Style="{StaticResource InputTextBox}" />
+                        <Label Content="Run daily starting at" Style="{StaticResource DarkLabel}"/>
+                        <TextBox Text="{Binding CurrentProfile.RunStartTime, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Style="{StaticResource InputTextBox}" />
+                        <Label Content="Repeat every (-1 for never)" Style="{StaticResource DarkLabel}"/>
+                        <TextBox Text="{Binding CurrentProfile.RunInterval, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Style="{StaticResource InputTextBox}" />
+                        <ComboBox SelectedValue="{Binding Path=CurrentProfile.RunIntervalTimeUnit}" SelectedValuePath="Name" Style="{StaticResource DarkCombobox}">
+                            <ComboBoxItem Name="seconds">Second(s)</ComboBoxItem>
+                            <ComboBoxItem Name="minutes">Minute(s)</ComboBoxItem>
+                            <ComboBoxItem Name="hours">Hour(s)</ComboBoxItem>
+                        </ComboBox>
                         <Button x:Name="CreateTaskButton" Content="Schedule Task" Click="CreateTaskClick" Style="{StaticResource DarkButton}" HorizontalAlignment="Center" />
                         <TextBox x:Name="CreateTaskResponse" Style="{StaticResource ResultTextBox}" />
                     </StackPanel>

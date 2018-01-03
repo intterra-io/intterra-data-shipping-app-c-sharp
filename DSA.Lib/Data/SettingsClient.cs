@@ -36,15 +36,100 @@ namespace DSA.Lib.Data
 
         public static UpdaterOpts Get()
         {
-            var opts = new UpdaterOpts();
+            UpdaterOpts opts = null;
 
-            if (File.Exists(GetSettingsPath()))
+            try
             {
-                return JsonConvert.DeserializeAnonymousType(File.ReadAllText(GetSettingsPath()), opts);
-            } else
-            {
-                return opts;
+                opts = JsonConvert.DeserializeAnonymousType(File.ReadAllText(GetSettingsPath()), opts);
             }
+            catch (Exception ex)
+            {
+                LogClient.Log(ex.Message);
+
+                // something went wrong - either this is first time or malformed object
+                opts = new UpdaterOpts();
+            }
+
+            // ensure profiles are created as expected
+            if (!opts.Profiles.ContainsKey("analytics"))
+                opts.Profiles["analytics"] = GetDefaultAnalyticsProfile();
+
+            if (!opts.Profiles.ContainsKey("sitstat"))
+                opts.Profiles["sitstat"] = GetDefaultSitstatProfile();
+
+            return opts;
+        }
+
+        public static UpdaterProfile GetDefaultAnalyticsProfile()
+        {
+            return new UpdaterProfile()
+            {
+                Name = "analytics",
+
+                RunInterval = -1,
+                RunIntervalTimeUnit = "hours",
+
+                IncidentsSelect = "*",
+                IncidentsFrom = "dbo.incidents",
+                IncidentsWhere = "last_updated_rms > '{{LASTUPDATEDDATETIME}}'",
+                IncidentsOrderBy = "incident_datetime",
+
+                UnitsSelect = "*",
+                UnitsFrom = "dbo.units",
+                UnitsWhere = "last_updated_rms > '{{LASTUPDATEDDATETIME}}'",
+                UnitsOrderBy = "last_updated_rms",
+
+                Driver = "mssql",
+                ConnectionString = "Data Source=ServerName,Initial Catalog=DatabaseName,User Id=userid,Password=password",
+                ApiKey = "",
+                ApiKeySecret = "",
+                Limit = 500000,
+#if DEBUG
+                LastDatetimeUrl = "http://localhost:8000/v1/data/get-last-datetime",
+                DataUrl = "http://localhost:8000/v1/data/add",
+                TestUrl = "http://localhost:8000/v1/keys/test",
+#else
+                LastDatetimeUrl = "https://dc.intterragroup.com/v1/data/get-last-datetime",
+                DataUrl = "https://dc.intterragroup.com/v1/data/add",
+                TestUrl = "https://dc.intterragroup.com/v1/keys/test,
+#endif
+            };
+        }
+
+        public static UpdaterProfile GetDefaultSitstatProfile()
+        {
+            return new UpdaterProfile()
+            {
+                Name = "sitstat",
+
+                RunInterval = 15,
+                RunIntervalTimeUnit = "seconds",
+
+                IncidentsSelect = "*",
+                IncidentsFrom = "dbo.incident_summary",
+                IncidentsWhere = "last_updated_rms > '{{LASTUPDATEDDATETIME}}'",
+                IncidentsOrderBy = "incident_datetime",
+
+                UnitsSelect = "*",
+                UnitsFrom = "dbo.unit_summary",
+                UnitsWhere = "last_updated_rms > '{{LASTUPDATEDDATETIME}}'",
+                UnitsOrderBy = "last_updated_rms",
+
+                Driver = "mssql",
+                ConnectionString = @"Data Source=.\SQLEXPRESS,Initial Catalog=sandbox,Integrated Security=true",
+                ApiKey = "",
+                ApiKeySecret = "",
+                Limit = -1,
+#if DEBUG
+                LastDatetimeUrl = "http://localhost:8000/v1/data/get-last-datetime",
+                DataUrl = "http://localhost:8000/v1/data/add",
+                TestUrl = "http://localhost:8000/v1/keys/test",
+#else
+                LastDatetimeUrl = "https://dc.intterragroup.com/v1/data/get-last-datetime",
+                DataUrl = "https://dc.intterragroup.com/v1/data/add",
+                TestUrl = "https://dc.intterragroup.com/v1/keys/test,
+#endif
+            };
         }
 
         public static void Save(this UpdaterOpts opts)

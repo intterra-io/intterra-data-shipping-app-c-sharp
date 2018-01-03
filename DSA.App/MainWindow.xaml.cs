@@ -3,11 +3,13 @@ using DSA.Lib.Data;
 using DSA.Lib.Models;
 using Microsoft.Win32.TaskScheduler;
 using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using System.Reflection;
 using System.Security.Principal;
 using System.Windows;
+using System.Windows.Controls;
 
 namespace DSA.App
 {
@@ -19,18 +21,25 @@ namespace DSA.App
         public UpdaterOpts Opts { get; set; } = SettingsClient.Get();
 
         const string TaskName = "Intterra Data Shipping App";
-        const string TaskDescription = "Reads incident response data from RMS data sources as configured and send to Intterra's secure API";
+        const string TaskDescription = "Reads incident response data from CAD, AVL, and/or RMS data sources as configured and sends to Intterra's secure API";
 
         public MainWindow()
         {
             InitializeComponent();
 
+            // Init profile button
+            ToggleProfileClick(Opts.CurrentProfileName == "analytics" ? ProfileAnalyticsButton : ProfileSitstatButton, null);
+
             DataContext = Opts;
 
-            if (IsAdministrator())
-            {
-                Title = $"{Title} (Administrator)";
-            }
+            SetTitle();
+        }
+
+        private void SetTitle()
+        {
+            var newTitle = $"{TaskName} [{Opts.CurrentProfileName}]";
+            newTitle += IsAdministrator() ? " (Administrator)" : "";
+            Title = newTitle;
         }
 
         private async void TestApiConnectivityClick(object sender, RoutedEventArgs e)
@@ -40,7 +49,7 @@ namespace DSA.App
 
             try
             {
-                TestApiConnectivityResponse.Text = await new Updater(Opts).TestApiConnectivity();
+                TestApiConnectivityResponse.Text = await new Updater(Opts.CurrentProfile).TestApiConnectivity();
             }
             catch (Exception ex)
             {
@@ -51,6 +60,7 @@ namespace DSA.App
                 TestApiConnectivityButton.IsEnabled = true;
             }
         }
+
         protected override void OnClosing(System.ComponentModel.CancelEventArgs e)
         {
             Opts.Save();
@@ -65,7 +75,7 @@ namespace DSA.App
 
             try
             {
-                TestDataConnectivityResponse.Text = await new Updater(Opts).TestDataConnectivity();
+                TestDataConnectivityResponse.Text = await new Updater(Opts.CurrentProfile).TestDataConnectivity();
             }
             catch (Exception ex)
             {
@@ -84,7 +94,7 @@ namespace DSA.App
 
             try
             {
-                var updater = new Updater(Opts);
+                var updater = new Updater(Opts.CurrentProfile);
                 var response = await updater.TestIncidentsQuery();
                 TestIncidentsQueryResponse.Text = $"Found {response.Item2} incident records since {updater.LastUpdateOn} - {response.Item1}";
             }
@@ -105,7 +115,7 @@ namespace DSA.App
 
             try
             {
-                var updater = new Updater(Opts);
+                var updater = new Updater(Opts.CurrentProfile);
                 var response = await updater.TestUnitsQuery();
                 TestUnitsQueryResponse.Text = $"Found {response.Item2} unit records since {updater.LastUpdateOn} - {response.Item1}";
             }
@@ -126,7 +136,7 @@ namespace DSA.App
 
             try
             {
-                var batches = new Updater(Opts).Run();
+                var batches = new Updater(Opts.CurrentProfile).Run();
                 var message = $"Successfully submitted {batches.Count()} batch(es): {string.Join(", ", batches.ToArray())}";
                 LogClient.Log(message);
                 RunAllResponse.Text = message;
@@ -176,9 +186,13 @@ namespace DSA.App
 
             try
             {
+                if (Opts.CurrentProfile.RunIntervalTimeUnit == "seconds" && 60 % Opts.CurrentProfile.RunInterval != 0)
+                {
+                    throw new Exception("Run interval must divide evenly into 60");
+                }
+
                 using (TaskService ts = new TaskService())
                 {
-
                     TaskDefinition td = ts.NewTask();
                     td.Settings.Enabled = true;
                     td.RegistrationInfo.Description = TaskDescription;
@@ -187,16 +201,62 @@ namespace DSA.App
                     td.Settings.MultipleInstances = TaskInstancesPolicy.IgnoreNew;
                     td.Settings.Hidden = true;
 
-                    var dt = new DailyTrigger();
-                    dt.DaysInterval = 1;
-                    dt.Repetition.Duration = TimeSpan.FromDays(1);
-                    dt.Repetition.Interval = TimeSpan.FromMinutes(Opts.RunInterval);
-                    td.Triggers.Add(dt);
+                    switch (Opts.CurrentProfile.RunIntervalTimeUnit)
+                    {
+                        case "seconds":
+                            {
+                                if (Opts.CurrentProfile.RunInterval > 0)
+                                {
+                                    for (int i = 0; i < 60 / Opts.CurrentProfile.RunInterval; i++)
+                                    {
+                                        var dt = new DailyTrigger();
+                                        dt.DaysInterval = 1;
+                                        dt.StartBoundary = Opts.CurrentProfile.RunStartTime + TimeSpan.FromSeconds(Opts.CurrentProfile.RunInterval * i);
 
-                    var action = new ExecAction(Assembly.GetExecutingAssembly().Location, "-s");
+                                        dt.Repetition.Duration = TimeSpan.FromDays(1);
+                                        dt.Repetition.Interval = TimeSpan.FromMinutes(1);
+
+                                        td.Triggers.Add(dt);
+                                    }
+                                }
+                            }
+                            break;
+                        case "minutes":
+                            {
+                                var dt = new DailyTrigger();
+                                dt.DaysInterval = 1;
+                                dt.StartBoundary = Opts.CurrentProfile.RunStartTime;
+
+                                if (Opts.CurrentProfile.RunInterval > 0)
+                                {
+                                    dt.Repetition.Duration = TimeSpan.FromDays(1);
+                                    dt.Repetition.Interval = TimeSpan.FromMinutes(Opts.CurrentProfile.RunInterval);
+                                }
+
+                                td.Triggers.Add(dt);
+                            }
+                            break;
+                        case "hours":
+                            {
+                                var dt = new DailyTrigger();
+                                dt.DaysInterval = 1;
+                                dt.StartBoundary = Opts.CurrentProfile.RunStartTime;
+
+                                if (Opts.CurrentProfile.RunInterval > 0)
+                                {
+                                    dt.Repetition.Duration = TimeSpan.FromDays(1);
+                                    dt.Repetition.Interval = TimeSpan.FromHours(Opts.CurrentProfile.RunInterval);
+                                }
+
+                                td.Triggers.Add(dt);
+                            }
+                            break;
+                    }
+
+                    var action = new ExecAction(Assembly.GetExecutingAssembly().Location, $"-s -p {Opts.CurrentProfile.Name}");
                     td.Actions.Add(action);
 
-                    var newTask = ts.RootFolder.RegisterTaskDefinition(TaskName, td, TaskCreation.CreateOrUpdate, null);
+                    var newTask = ts.RootFolder.RegisterTaskDefinition($"{TaskName} ({Opts.CurrentProfile.Name})", td, TaskCreation.CreateOrUpdate, null);
 
                     CreateTaskResponse.Text = $"Schedule successfully created: '{newTask.Name}'";
                 }
@@ -222,6 +282,34 @@ namespace DSA.App
         {
             if (Tabs.SelectedIndex != 0)
                 Tabs.SelectedIndex--;
+        }
+
+        private void ToggleProfileClick(object sender, RoutedEventArgs e)
+        {
+            var normalStyle = Application.Current.Resources["SegmentButton"] as Style;
+            var selectedStyle = Application.Current.Resources["SegmentButtonSelected"] as Style;
+
+            ProfileAnalyticsButton.Style = normalStyle;
+            ProfileSitstatButton.Style = normalStyle;
+            (sender as Button).Style = selectedStyle;
+
+            if (sender == ProfileAnalyticsButton)
+            {
+                Opts.CurrentProfileName = "analytics";
+            }
+            else if (sender == ProfileSitstatButton)
+            {
+                Opts.CurrentProfileName = "sitstat";
+            }
+
+            Opts.CurrentProfile = Opts.Profiles[Opts.CurrentProfileName];
+
+            // Refresh all bindings
+            DataContext = null;
+            DataContext = Opts;
+
+            // Update title
+            SetTitle();
         }
 
         private bool IsAdministrator()
