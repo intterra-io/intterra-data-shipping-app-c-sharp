@@ -91,7 +91,7 @@ namespace DSA.Lib.Data
 #else
                 LastDatetimeUrl = "https://dc.intterragroup.com/v1/data/get-last-datetime",
                 DataUrl = "https://dc.intterragroup.com/v1/data/add",
-                TestUrl = "https://dc.intterragroup.com/v1/keys/test,
+                TestUrl = "https://dc.intterragroup.com/v1/keys/test",
 #endif
             };
         }
@@ -127,7 +127,7 @@ namespace DSA.Lib.Data
 #else
                 LastDatetimeUrl = "https://dc.intterragroup.com/v1/data/get-last-datetime",
                 DataUrl = "https://dc.intterragroup.com/v1/data/add",
-                TestUrl = "https://dc.intterragroup.com/v1/keys/test,
+                TestUrl = "https://dc.intterragroup.com/v1/keys/test",
 #endif
             };
         }
