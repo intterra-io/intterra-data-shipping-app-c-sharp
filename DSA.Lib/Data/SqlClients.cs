@@ -3,6 +3,7 @@ using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
 using System.Data;
+using System.Data.Odbc;
 using System.Data.SqlClient;
 using System.Globalization;
 using System.Linq;
@@ -11,7 +12,12 @@ using System.Text;
 
 namespace DSA.Lib.Data
 {
-    public class SqlServerClient
+    public abstract class SqlClient
+    {
+        public abstract DataTable GetData(string query);
+    }
+
+    public class SqlServerClient : SqlClient
     {
         private string DbName;
         private string ServerName;
@@ -32,7 +38,7 @@ namespace DSA.Lib.Data
             ConnectionString = connectionString;
         }
 
-        public DataTable GetData(string query)
+        public override DataTable GetData(string query)
         {
             var list = new List<JObject>();
             using (var conn = GetConnection())
@@ -57,6 +63,48 @@ namespace DSA.Lib.Data
         private SqlConnection GetConnection()
         {
             var output = new SqlConnection(ConnectionString ?? $"Data Source={ServerName};initial catalog={DbName}SitStat;user id={Username};password={Password}");
+            if (output.State != ConnectionState.Open)
+            {
+                output.Open();
+            }
+            return output;
+        }
+    }
+
+    public class OdbcClient : SqlClient
+    {
+        private string ConnectionString;
+        
+        public OdbcClient(string connectionString)
+        {
+            ConnectionString = connectionString;
+        }
+
+        public override DataTable GetData(string query)
+        {
+            var list = new List<JObject>();
+            using (var conn = GetConnection())
+            {
+                using (var cmd = new OdbcCommand
+                {
+                    CommandTimeout = 300,
+                    Connection = conn,
+                    CommandType = CommandType.Text,
+                    CommandText = query
+                })
+                {
+                    var table = new DataTable();
+                    using (var da = new OdbcDataAdapter(cmd))
+                        da.Fill(table);
+
+                    return table;
+                }
+            }
+        }
+
+        private OdbcConnection GetConnection()
+        {
+            var output = new OdbcConnection(ConnectionString);
             if (output.State != ConnectionState.Open)
             {
                 output.Open();

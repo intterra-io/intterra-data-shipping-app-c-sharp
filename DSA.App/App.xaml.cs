@@ -26,7 +26,21 @@ namespace DSA.App
                 try
                 {
                     var opts = SettingsClient.Get();
-                    var batches = new Updater(opts).Run();
+
+                    var profileIx = Array.FindIndex(e.Args, x => x == "-p" || x == "--profile");
+                    if (profileIx == -1 || profileIx + 1 > e.Args.Length - 1)
+                    {
+                        throw new Exception("Profile must be specified");
+                    }
+
+                    var profileName = e.Args[profileIx + 1];
+                    var profile = opts.Profiles[profileName];
+                    if (profileIx == -1 || profileIx + 1 > e.Args.Length - 1)
+                    {
+                        throw new Exception($"Profile not found: {profileName}");
+                    }
+
+                    var batches = new Updater(profile).Run();
                     LogClient.Log($"Successfully submitted {batches.Count()} batch(es): {string.Join(", ", batches.ToArray())}");
                 }
                 catch (Exception ex)
