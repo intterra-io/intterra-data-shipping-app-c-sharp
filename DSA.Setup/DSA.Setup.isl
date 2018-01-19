@@ -4348,7 +4348,7 @@ UwBpAG4AZwBsAGUASQBtAGEAZwBlAAEARQB4AHAAcgBlAHMAcwA=
 		<row><td>PROGRAMFILETOLAUNCHATEND</td><td>[INSTALLDIR]DSA.Application.Primary output</td><td/></row>
 		<row><td>ProductCode</td><td>{93BCAF47-3909-444A-83D8-7522302881C3}</td><td/></row>
 		<row><td>ProductName</td><td>Data Shipping App</td><td/></row>
-		<row><td>ProductVersion</td><td>2.0.0</td><td/></row>
+		<row><td>ProductVersion</td><td>2.1.0</td><td/></row>
 		<row><td>ProgressType0</td><td>install</td><td/></row>
 		<row><td>ProgressType1</td><td>Installing</td><td/></row>
 		<row><td>ProgressType2</td><td>installed</td><td/></row>

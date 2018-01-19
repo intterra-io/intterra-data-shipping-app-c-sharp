@@ -22,7 +22,7 @@ namespace DSA.Lib.Data
                 case "mst7mdt":
                     return TimeZoneInfo.FindSystemTimeZoneById("mountain standard time");
                 case "pst":
-                case "pst7pdt":
+                case "pst8pdt":
                     return TimeZoneInfo.FindSystemTimeZoneById("pacific standard time");
                 default:
                     return null;
