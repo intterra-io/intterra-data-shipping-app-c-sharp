@@ -9,6 +9,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DSA.Application", "DSA.App\
 EndProject
 Project("{6141683F-8A12-4E36-9623-2EB02B2C2303}") = "DSA.Setup", "DSA.Setup\DSA.Setup.isproj", "{D5C17519-7EE7-4793-A0A6-113D3697714E}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DSA.Console", "DSA.Console\DSA.Console.csproj", "{2558DB05-3AF2-4173-93BA-B2492B8220ED}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		CD_ROM|Any CPU = CD_ROM|Any CPU
@@ -48,6 +50,16 @@ Global
 		{D5C17519-7EE7-4793-A0A6-113D3697714E}.Release|Any CPU.Build.0 = SingleImage
 		{D5C17519-7EE7-4793-A0A6-113D3697714E}.SingleImage|Any CPU.ActiveCfg = SingleImage
 		{D5C17519-7EE7-4793-A0A6-113D3697714E}.SingleImage|Any CPU.Build.0 = SingleImage
+		{2558DB05-3AF2-4173-93BA-B2492B8220ED}.CD_ROM|Any CPU.ActiveCfg = Release|Any CPU
+		{2558DB05-3AF2-4173-93BA-B2492B8220ED}.CD_ROM|Any CPU.Build.0 = Release|Any CPU
+		{2558DB05-3AF2-4173-93BA-B2492B8220ED}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{2558DB05-3AF2-4173-93BA-B2492B8220ED}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{2558DB05-3AF2-4173-93BA-B2492B8220ED}.DVD-5|Any CPU.ActiveCfg = Debug|Any CPU
+		{2558DB05-3AF2-4173-93BA-B2492B8220ED}.DVD-5|Any CPU.Build.0 = Debug|Any CPU
+		{2558DB05-3AF2-4173-93BA-B2492B8220ED}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{2558DB05-3AF2-4173-93BA-B2492B8220ED}.Release|Any CPU.Build.0 = Release|Any CPU
+		{2558DB05-3AF2-4173-93BA-B2492B8220ED}.SingleImage|Any CPU.ActiveCfg = Release|Any CPU
+		{2558DB05-3AF2-4173-93BA-B2492B8220ED}.SingleImage|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

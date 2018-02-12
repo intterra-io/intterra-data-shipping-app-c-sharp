@@ -1,6 +1,7 @@
 ﻿using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Globalization;
 using System.Linq;
 using System.Text;
@@ -12,13 +13,31 @@ namespace DSA.Lib.Models
         public string CurrentProfileName { get; set; } = "analytics";
         [JsonIgnore]
         public UpdaterProfile CurrentProfile { get; set; }
+        [JsonIgnore]
+        public bool CurrentProfileNotNull { get; set; } = false;
         public IReadOnlyList<string> DbDrivers { get; } = new List<string>(new[] { "mssql", "odbc" }).AsReadOnly();
-        public Dictionary<string, UpdaterProfile> Profiles { get; } = new Dictionary<string, UpdaterProfile>();
+        public IReadOnlyList<string> ProfileTypes { get; } = new List<string>(new[] { "analytics", "sitstat" }).AsReadOnly();
+        public ObservableCollection<UpdaterProfile> Profiles { get; } = new ObservableCollection<UpdaterProfile>();
+        public string LogUrl { get; set; }
+        public bool RemoteLogging { get; set; } = true;
+
+        public UpdaterOpts()
+        {
+            if (string.IsNullOrWhiteSpace(LogUrl))
+            {
+#if DEBUG
+                LogUrl = "https://portal-dev.intterragroup.com/api/logs/create";
+#else
+                LogUrl = "https://portal.intterragroup.com/api/logs/create"
+#endif
+            }
+        }
     }
 
     public class UpdaterProfile
     {
         public string Name { get; set; }
+        public string Type { get; set; }
         public string LastDatetimeUrl { get; set; }
         public string DataUrl { get; set; }
         public string TestUrl { get; set; }

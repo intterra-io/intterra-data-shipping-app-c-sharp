@@ -44,28 +44,23 @@ namespace DSA.Lib.Data
             }
             catch (Exception ex)
             {
-                LogClient.Log(ex.Message);
-
                 // something went wrong - either this is first time or malformed object
                 opts = new UpdaterOpts();
             }
 
             // ensure profiles are created as expected
-            if (!opts.Profiles.ContainsKey("analytics"))
-                opts.Profiles["analytics"] = GetDefaultAnalyticsProfile();
-
-            if (!opts.Profiles.ContainsKey("sitstat"))
-                opts.Profiles["sitstat"] = GetDefaultSitstatProfile();
+            if (opts.Profiles.Count == 0)
+                opts.Profiles.Add(GetDefaultProfile());
 
             return opts;
         }
 
-        public static UpdaterProfile GetDefaultAnalyticsProfile()
+        public static UpdaterProfile GetDefaultProfile()
         {
             return new UpdaterProfile()
             {
-                Name = "analytics",
-
+                Name = "Default Profile",
+                Type = "analytics",
                 RunInterval = -1,
                 RunIntervalTimeUnit = "hours",
 
@@ -80,7 +75,7 @@ namespace DSA.Lib.Data
                 UnitsOrderBy = "last_updated_rms",
 
                 Driver = "mssql",
-                ConnectionString = "Data Source=ServerName,Initial Catalog=DatabaseName,User Id=userid,Password=password",
+                ConnectionString = "Data Source=my_server;Initial Catalog=my_db;User Id=my_uid; Password=my_password",
                 ApiKey = "",
                 ApiKeySecret = "",
                 Limit = 500000,
@@ -96,45 +91,22 @@ namespace DSA.Lib.Data
             };
         }
 
-        public static UpdaterProfile GetDefaultSitstatProfile()
-        {
-            return new UpdaterProfile()
-            {
-                Name = "sitstat",
-
-                RunInterval = 15,
-                RunIntervalTimeUnit = "seconds",
-
-                IncidentsSelect = "*",
-                IncidentsFrom = "dbo.incident_summary",
-                IncidentsWhere = "last_updated_rms > '{{LASTUPDATEDDATETIME}}'",
-                IncidentsOrderBy = "incident_datetime",
-
-                UnitsSelect = "*",
-                UnitsFrom = "dbo.unit_summary",
-                UnitsWhere = "last_updated_rms > '{{LASTUPDATEDDATETIME}}'",
-                UnitsOrderBy = "last_updated_rms",
-
-                Driver = "mssql",
-                ConnectionString = @"Data Source=.\SQLEXPRESS,Initial Catalog=sandbox,Integrated Security=true",
-                ApiKey = "",
-                ApiKeySecret = "",
-                Limit = -1,
-#if DEBUG
-                LastDatetimeUrl = "http://localhost:8000/v1/data/get-last-datetime",
-                DataUrl = "http://localhost:8000/v1/data/add",
-                TestUrl = "http://localhost:8000/v1/keys/test",
-#else
-                LastDatetimeUrl = "https://dc.intterragroup.com/v1/data/get-last-datetime",
-                DataUrl = "https://dc.intterragroup.com/v1/data/add",
-                TestUrl = "https://dc.intterragroup.com/v1/keys/test",
-#endif
-            };
-        }
-
         public static void Save(this UpdaterOpts opts)
         {
+            // make sure we don't have any duplicate profiles
+            var dups = opts.Profiles.GroupBy(x => x.Name).Where(group => group.Count() > 1);
+            if (dups.Count() > 0)
+            {
+                throw new Exception($"Duplicate profile names: {string.Join(",", dups)}");
+            }
 
+            // Set current profile name (so we can load it on next startup)
+            if (opts.CurrentProfile != null)
+            {
+                opts.CurrentProfileName = opts.CurrentProfile.Name;
+            }
+
+            // Hit it!
             File.WriteAllText(GetSettingsPath(), JsonConvert.SerializeObject(opts, Formatting.Indented));
         }
 

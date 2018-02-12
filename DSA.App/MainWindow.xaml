@@ -9,17 +9,57 @@
     <Grid>
         <TabControl x:Name="Tabs" Background="White" Margin="0 0 0 50" BorderThickness="0 1 0 0">
             <TabItem Header="Profile" >
-                <ScrollViewer VerticalScrollBarVisibility="Auto">
-                    <StackPanel>
-                        <Label Content="Profile" Style="{StaticResource DarkTitle}" />
-                        <Label Content="Agency (Optional)" Style="{StaticResource DarkLabel}"/>
-                        <TextBox Text="{Binding CurrentProfile.Agency, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Style="{StaticResource InputTextBox}" />
-                        <WrapPanel HorizontalAlignment="Center">
-                            <Button x:Name="ProfileSitstatButton" Content="CAD/AVL" Style="{StaticResource SegmentButton}" HorizontalAlignment="Center" Click="ToggleProfileClick" />
-                            <Button x:Name="ProfileAnalyticsButton" Content="RMS" Style="{StaticResource SegmentButton}" HorizontalAlignment="Center" Click="ToggleProfileClick" />
-                        </WrapPanel>
-                    </StackPanel>
-                </ScrollViewer>
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="*"/>
+                    </Grid.RowDefinitions>
+                    <Label Content="Profile" Style="{StaticResource DarkTitle}" Grid.Row="0" />
+                    <Grid Grid.Row="1" Margin="10 0 0 10">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="200"/>
+                            <ColumnDefinition Width="*"/>
+                        </Grid.ColumnDefinitions>
+                        <Grid Grid.Column="0" Margin="0 0 0 10">
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="*"/>
+                                <RowDefinition Height="Auto"/>
+                            </Grid.RowDefinitions>
+                            <ListBox Grid.Row="0" x:Name="ProfilesListbox" DockPanel.Dock="Left" ItemsSource="{Binding Profiles}" SelectedValue="{Binding CurrentProfile}"  SelectionChanged="ProfilesListbox_SelectionChanged" DisplayMemberPath="Name" BorderThickness="1 1 1 0" BorderBrush="LightGray" />
+                            <Border Grid.Row="1" BorderBrush="LightGray" BorderThickness="1 0 1 1" VerticalAlignment="Bottom"  >
+                                <StackPanel >
+                                    <Button x:Name="NewProfile" Content="New Profile" Margin="10" Click="NewProfile_Click" />
+                                </StackPanel>
+                            </Border>
+                        </Grid>
+                        <ScrollViewer VerticalScrollBarVisibility="Auto" DockPanel.Dock="Right" Grid.Column="1">
+                            <StackPanel>
+                                <Label Content="Name" Style="{StaticResource DarkLabel}"/>
+                                <TextBox IsEnabled="{Binding CurrentProfileNotNull}" Text="{Binding CurrentProfile.Name, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Style="{StaticResource InputTextBox}" />
+                                <Label Content="Type" Style="{StaticResource DarkLabel}"/>
+                                <ComboBox ItemsSource="{Binding Path=ProfileTypes}" SelectedValue="{Binding CurrentProfile.Type}" Style="{StaticResource DarkCombobox}" />
+                                <Label Content="Agency (optional)" Style="{StaticResource DarkLabel}"/>
+                                <TextBox Text="{Binding CurrentProfile.Agency, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Style="{StaticResource InputTextBox}" />
+                                <Label Content="Share runtime logs with Intterra" Style="{StaticResource DarkLabel}"/>
+                                <CheckBox IsChecked="{Binding RemoteLogging, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Margin="10 0 10 10" />
+                                <Button x:Name="DeleteProfile" Content="Delete Profile" Width="100" Background="White" Foreground="#C2322E" Margin="10 10 10 0" Click="DeleteProfile_Click" >
+                                    <Button.Template>
+                                        <ControlTemplate TargetType="{x:Type Button}">
+                                            <Border x:Name="bdr_main" Margin="4" BorderThickness="1" BorderBrush="Transparent" Background="Transparent">
+                                                <ContentPresenter VerticalAlignment="Center" HorizontalAlignment="Center" Margin="8,6,8,6" ContentSource="Content" />
+                                            </Border>
+                                            <ControlTemplate.Triggers>
+                                                <Trigger Property="IsMouseOver" Value="True">
+                                                    <Setter TargetName="bdr_main" Property="BorderBrush" Value="#C2322E"/>
+                                                </Trigger>
+                                            </ControlTemplate.Triggers>
+                                        </ControlTemplate>
+                                    </Button.Template>
+                                </Button>
+                            </StackPanel>
+                        </ScrollViewer>
+                    </Grid>
+                </Grid>
             </TabItem>
             <TabItem Header="Authentication" >
                 <ScrollViewer VerticalScrollBarVisibility="Auto">
@@ -131,9 +171,13 @@
                 </ScrollViewer>
             </TabItem>
         </TabControl>
-        <DockPanel VerticalAlignment="Bottom">
-            <Button Content="Back" DockPanel.Dock="Left" HorizontalAlignment="Left" Style="{StaticResource DarkButton}" Click="BackButtonClick"  />
-            <Button Content="Next" DockPanel.Dock="Right" HorizontalAlignment="Right" Style="{StaticResource DarkButton}" Click="NextButtonClick"  />
-        </DockPanel>
+        <Border BorderBrush="LightGray" BorderThickness="0 1 0 0" VerticalAlignment="Bottom"  >
+            <DockPanel VerticalAlignment="Bottom">
+                <Button Content="Back" DockPanel.Dock="Left" HorizontalAlignment="Left" Style="{StaticResource DarkButton}" Click="BackButtonClick"  />
+                <Button Content="Next" DockPanel.Dock="Right" HorizontalAlignment="Right" Style="{StaticResource DarkButton}" Click="NextButtonClick"  />
+                <Button Content="Save" DockPanel.Dock="Right" HorizontalAlignment="Right" Style="{StaticResource DarkButton}" Click="SaveButtonClick"  />
+                <Label DataContext="{Binding RelativeSource={RelativeSource Self}}" Content="{Binding SavedOn}" DockPanel.Dock="Right" HorizontalAlignment="Right" Style="{StaticResource DarkLabel}" VerticalContentAlignment="Center"  />
+            </DockPanel>
+        </Border>
     </Grid>
 </Window>

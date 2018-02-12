@@ -19,6 +19,7 @@ namespace DSA.App
     public partial class MainWindow : Window
     {
         public UpdaterOpts Opts { get; set; } = SettingsClient.Get();
+        public string SavedOn { get; set; } = "";
 
         const string TaskName = "Intterra Data Shipping App";
         const string TaskDescription = "Reads incident response data from CAD, AVL, and/or RMS data sources as configured and sends to Intterra's secure API";
@@ -27,17 +28,27 @@ namespace DSA.App
         {
             InitializeComponent();
 
-            // Init profile button
-            ToggleProfileClick(Opts.CurrentProfileName == "analytics" ? ProfileAnalyticsButton : ProfileSitstatButton, null);
-
             DataContext = Opts;
+
+            if (!string.IsNullOrWhiteSpace(Opts.CurrentProfileName))
+            {
+                Opts.CurrentProfile = Opts.Profiles.FirstOrDefault(x => x.Name == Opts.CurrentProfileName);
+            }
+
+            if (Opts.CurrentProfile == null)
+            {
+                Opts.CurrentProfile = Opts.Profiles.FirstOrDefault();
+            }
+
+            Opts.CurrentProfileNotNull = Opts.CurrentProfile != null;
 
             SetTitle();
         }
 
         private void SetTitle()
         {
-            var newTitle = $"{TaskName} [{Opts.CurrentProfileName}]";
+            var newTitle = $"{TaskName}";
+            newTitle += Opts.CurrentProfile != null ? $" [{Opts.CurrentProfile.Name}]" : "";
             newTitle += IsAdministrator() ? " (Administrator)" : "";
             Title = newTitle;
         }
@@ -63,7 +74,7 @@ namespace DSA.App
 
         protected override void OnClosing(System.ComponentModel.CancelEventArgs e)
         {
-            Opts.Save();
+            //Opts.Save();
 
             base.OnClosing(e);
         }
@@ -138,7 +149,7 @@ namespace DSA.App
             {
                 var batches = new Updater(Opts.CurrentProfile).Run();
                 var message = $"Successfully submitted {batches.Count()} batch(es): {string.Join(", ", batches.ToArray())}";
-                LogClient.Log(message);
+                LogClient.Log(new LogEntry(message, "INFO", Opts.CurrentProfile.ApiKey), Opts.RemoteLogging, Opts.LogUrl);
                 RunAllResponse.Text = message;
             }
             catch (Exception ex)
@@ -271,6 +282,11 @@ namespace DSA.App
             }
         }
 
+        private void SaveButtonClick(object sender, RoutedEventArgs e)
+        {
+            Save();
+        }
+
         private void NextButtonClick(object sender, RoutedEventArgs e)
         {
             if (Tabs.SelectedIndex != Tabs.Items.Count - 1)
@@ -284,38 +300,57 @@ namespace DSA.App
                 Tabs.SelectedIndex--;
         }
 
-        private void ToggleProfileClick(object sender, RoutedEventArgs e)
+        private void ProfilesListbox_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
-            var normalStyle = Application.Current.Resources["SegmentButton"] as Style;
-            var selectedStyle = Application.Current.Resources["SegmentButtonSelected"] as Style;
-
-            ProfileAnalyticsButton.Style = normalStyle;
-            ProfileSitstatButton.Style = normalStyle;
-            (sender as Button).Style = selectedStyle;
-
-            if (sender == ProfileAnalyticsButton)
-            {
-                Opts.CurrentProfileName = "analytics";
-            }
-            else if (sender == ProfileSitstatButton)
-            {
-                Opts.CurrentProfileName = "sitstat";
-            }
-
-            Opts.CurrentProfile = Opts.Profiles[Opts.CurrentProfileName];
-
             // Refresh all bindings
-            DataContext = null;
-            DataContext = Opts;
+            //DataContext = null;
+            //DataContext = Opts;
+
+            Opts.CurrentProfileNotNull = Opts.CurrentProfile != null;
 
             // Update title
             SetTitle();
+        }
+
+        private void Save()
+        {
+            try
+            {
+                Opts.Save();
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Problem saving settings:\n\n{ex.Message}", "Whoops!", MessageBoxButton.OK);
+            }
+
+            SavedOn = new DateTime().ToShortTimeString();
         }
 
         private bool IsAdministrator()
         {
             return (new WindowsPrincipal(WindowsIdentity.GetCurrent()))
                       .IsInRole(WindowsBuiltInRole.Administrator);
+        }
+
+        private void NewProfile_Click(object sender, RoutedEventArgs e)
+        {
+            var newProfile = SettingsClient.GetDefaultProfile();
+            newProfile.Name = "(New Profile)";
+            Opts.Profiles.Add(newProfile);
+            Opts.CurrentProfile = Opts.Profiles.FirstOrDefault(x => x.Name == newProfile.Name);
+            Opts.CurrentProfileNotNull = Opts.CurrentProfile != null;
+        }
+
+        private void DeleteProfile_Click(object sender, RoutedEventArgs e)
+        {
+            var result = MessageBox.Show(this, $"Are you sure you want to delete \"{Opts.CurrentProfile.Name}\"?", "Are you sure?", MessageBoxButton.OKCancel, MessageBoxImage.Question, MessageBoxResult.Cancel);
+
+            if (result == MessageBoxResult.OK)
+            {
+                Opts.Profiles.Remove(Opts.CurrentProfile);
+                Opts.CurrentProfile = Opts.Profiles.FirstOrDefault();
+                Opts.CurrentProfileNotNull = Opts.CurrentProfile != null;
+            }
         }
     }
 }

@@ -69,6 +69,13 @@ namespace DSA.Lib
 
         private JObject SendData(DataTable incidents, DataTable units)
         {
+            if (incidents.Rows.Count == 0 && units.Rows.Count == 0)
+            {
+                var response = new JObject();
+                response.Add("message", "No data to send" );
+                return response;
+            }
+
             var incidentsBytes = Encoding.UTF8.GetBytes(incidents.toCsv());
             var unitsBytes = Encoding.UTF8.GetBytes(units.toCsv());
 

@@ -1,4 +1,6 @@
-﻿using System;
+﻿using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
+using System;
 using System.Collections.Generic;
 using System.Collections.Specialized;
 using System.Linq;
@@ -39,6 +41,22 @@ namespace DSA.Lib.Data
                     httpClient.DefaultRequestHeaders.Authorization = authorization;
                 }
                 var response = httpClient.PostAsync(uri, form);
+                response.Wait();
+                return response.Result;
+            }
+        }
+
+        public static HttpResponseMessage PostJson(string uri, object json, AuthenticationHeaderValue authorization = null)
+        {
+            using (var httpClient = new HttpClient())
+            {
+                if (authorization != null)
+                {
+                    httpClient.DefaultRequestHeaders.Authorization = authorization;
+                }
+
+                var content = new StringContent(JsonConvert.SerializeObject(json), Encoding.UTF8, "application/json");
+                var response = httpClient.PostAsync(uri, content);
                 response.Wait();
                 return response.Result;
             }
