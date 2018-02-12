@@ -12,6 +12,8 @@
                 <ScrollViewer VerticalScrollBarVisibility="Auto">
                     <StackPanel>
                         <Label Content="Profile" Style="{StaticResource DarkTitle}" />
+                        <Label Content="Agency (Optional)" Style="{StaticResource DarkLabel}"/>
+                        <TextBox Text="{Binding CurrentProfile.Agency, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Style="{StaticResource InputTextBox}" />
                         <WrapPanel HorizontalAlignment="Center">
                             <Button x:Name="ProfileSitstatButton" Content="CAD/AVL" Style="{StaticResource SegmentButton}" HorizontalAlignment="Center" Click="ToggleProfileClick" />
                             <Button x:Name="ProfileAnalyticsButton" Content="RMS" Style="{StaticResource SegmentButton}" HorizontalAlignment="Center" Click="ToggleProfileClick" />

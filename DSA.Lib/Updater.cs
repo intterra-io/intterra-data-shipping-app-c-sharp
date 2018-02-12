@@ -75,6 +75,10 @@ namespace DSA.Lib
             MultipartFormDataContent form = new MultipartFormDataContent();
 
             form.Add(new StringContent(Profile.Name), "\"type\"");
+
+            if (!string.IsNullOrWhiteSpace(Profile.Agency))
+                form.Add(new StringContent(Profile.Agency), "\"agency\""); // Add agency if populated
+
             form.Add(new ByteArrayContent(incidentsBytes, 0, incidentsBytes.Length), "\"incidents\"", "incidents.csv");
             form.Add(new ByteArrayContent(unitsBytes, 0, unitsBytes.Length), "\"units\"", "units.csv");
 
