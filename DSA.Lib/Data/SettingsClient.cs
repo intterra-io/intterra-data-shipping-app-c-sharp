@@ -55,6 +55,13 @@ namespace DSA.Lib.Data
             return opts;
         }
 
+        public static bool HasChanges(UpdaterOpts inMemSettings)
+        {
+            var persistentSettings = Get();
+
+            return JsonConvert.SerializeObject(persistentSettings) != JsonConvert.SerializeObject(inMemSettings);
+        }
+
         public static UpdaterProfile GetDefaultProfile()
         {
             return new UpdaterProfile()

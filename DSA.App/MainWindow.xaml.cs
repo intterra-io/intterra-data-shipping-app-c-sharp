@@ -43,6 +43,13 @@ namespace DSA.App
             Opts.CurrentProfileNotNull = Opts.CurrentProfile != null;
 
             SetTitle();
+
+            // jump to and create schedule 
+            if (Environment.GetCommandLineArgs().Contains("--schedule"))
+            {
+                Tabs.SelectedIndex = Tabs.Items.Count - 1;
+                CreateTask();
+            }
         }
 
         private void SetTitle()
@@ -74,7 +81,21 @@ namespace DSA.App
 
         protected override void OnClosing(System.ComponentModel.CancelEventArgs e)
         {
-            //Opts.Save();
+            if (SettingsClient.HasChanges(Opts))
+            {
+                var previouslySavedOn = SavedOn;
+                var dialogResult = MessageBox.Show("There are unsaved changes, would you like to save?", "Save Changes", MessageBoxButton.OKCancel);
+                if (dialogResult == MessageBoxResult.OK)
+                {
+                    Save();
+
+                    // Cancel closing event if save failed
+                    if (previouslySavedOn == SavedOn)
+                    {
+                        e.Cancel = true;
+                    }
+                }
+            }
 
             base.OnClosing(e);
         }
@@ -169,9 +190,19 @@ namespace DSA.App
                 var dialogResult = MessageBox.Show("This function requires Adminitrator privileges.\n\nRestart in Admin mode?", "Administrator Required", MessageBoxButton.OKCancel);
                 if (dialogResult == MessageBoxResult.OK)
                 {
+                    // we can assume a user wants to save their settings
+                    var previouslySavedOn = SavedOn;
+                    Save();
+                    if (previouslySavedOn == SavedOn)
+                    {
+                        //save failed
+                        return;
+                    }
+
                     var proc = new ProcessStartInfo();
                     proc.UseShellExecute = true;
                     proc.FileName = Assembly.GetExecutingAssembly().Location;
+                    proc.Arguments = "--schedule";
                     proc.Verb = "runas";
 
                     try
@@ -190,6 +221,11 @@ namespace DSA.App
                 }
             }
 
+            CreateTask();
+        }
+
+        private void CreateTask()
+        {
             CreateTaskResponse.Text = "Working...";
             CreateTaskButton.IsEnabled = false;
             var taskMessage = string.Empty;
@@ -317,13 +353,12 @@ namespace DSA.App
             try
             {
                 Opts.Save();
+                SavedOn = new DateTime().ToShortTimeString();
             }
             catch (Exception ex)
             {
                 MessageBox.Show($"Problem saving settings:\n\n{ex.Message}", "Whoops!", MessageBoxButton.OK);
             }
-
-            SavedOn = new DateTime().ToShortTimeString();
         }
 
         private bool IsAdministrator()
