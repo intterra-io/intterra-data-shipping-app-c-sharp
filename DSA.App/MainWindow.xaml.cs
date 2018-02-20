@@ -5,6 +5,7 @@ using Microsoft.Win32.TaskScheduler;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Security.Principal;
@@ -19,10 +20,10 @@ namespace DSA.App
     public partial class MainWindow : Window
     {
         public UpdaterOpts Opts { get; set; } = SettingsClient.GetSettings();
-        public string SavedOn { get; set; } = "";
 
         const string TaskName = "Intterra Data Shipping App";
         const string TaskDescription = "Reads incident response data from CAD, AVL, and/or RMS data sources as configured and sends to Intterra's secure API";
+        const string GithubUrl = "https://github.com/intterra/intterra-data-shipping-app-c-sharp";
 
         public MainWindow()
         {
@@ -30,9 +31,9 @@ namespace DSA.App
 
             DataContext = Opts;
 
-            if (!string.IsNullOrWhiteSpace(Opts.CurrentProfileName))
+            if (Opts.CurrentProfileId != Guid.Empty)
             {
-                Opts.CurrentProfile = Opts.Profiles.FirstOrDefault(x => x.Name == Opts.CurrentProfileName);
+                Opts.CurrentProfile = Opts.Profiles.FirstOrDefault(x => x.Id == Opts.CurrentProfileId);
             }
 
             if (Opts.CurrentProfile == null)
@@ -43,7 +44,12 @@ namespace DSA.App
             Opts.CurrentProfileNotNull = Opts.CurrentProfile != null;
 
             SetTitle();
+            VersionLabel.Content = Assembly.GetEntryAssembly().GetName().Version;
+            DsaAppWindow.ContentRendered += DsaAppWindow_ContentRendered;
+        }
 
+        private void DsaAppWindow_ContentRendered(object sender, EventArgs e)
+        {
             // jump to and create schedule 
             if (Environment.GetCommandLineArgs().Contains("--schedule"))
             {
@@ -83,21 +89,32 @@ namespace DSA.App
         {
             if (SettingsClient.HasChanges(Opts))
             {
-                var previouslySavedOn = SavedOn;
-                var dialogResult = MessageBox.Show("There are unsaved changes, would you like to save?", "Save Changes", MessageBoxButton.OKCancel);
-                if (dialogResult == MessageBoxResult.OK)
+                var previouslySavedOn = Opts.SavedOn;
+                var dialogResult = MessageBox.Show("There are unsaved changes, would you like to save?", "Save Changes", MessageBoxButton.YesNoCancel);
+                if (dialogResult == MessageBoxResult.Yes)
                 {
                     Save();
 
                     // Cancel closing event if save failed
-                    if (previouslySavedOn == SavedOn)
+                    if (previouslySavedOn == Opts.SavedOn)
                     {
                         e.Cancel = true;
                     }
                 }
+                else if (dialogResult == MessageBoxResult.Cancel)
+                {
+                    e.Cancel = true;
+                    base.OnClosing(e);
+                }
+                else
+                {
+                    base.OnClosing(e);
+                }
             }
-
-            base.OnClosing(e);
+            else
+            {
+                base.OnClosing(e);
+            }
         }
 
         private async void TestDataConnectivityClick(object sender, RoutedEventArgs e)
@@ -128,7 +145,7 @@ namespace DSA.App
             {
                 var updater = new Updater(Opts.CurrentProfile);
                 var response = await updater.TestIncidentsQuery();
-                TestIncidentsQueryResponse.Text = $"Found {response.Item2} incident records since {updater.LastUpdateOn} - {response.Item1}";
+                TestIncidentsQueryResponse.Text = $"Last modified date from API: { (updater.LastUpdateOn != null ? updater.LastUpdateOn.ToString() : "N/A") }\n\nFound {response.Item2} incident records: {response.Item1}";
             }
             catch (Exception ex)
             {
@@ -149,7 +166,7 @@ namespace DSA.App
             {
                 var updater = new Updater(Opts.CurrentProfile);
                 var response = await updater.TestUnitsQuery();
-                TestUnitsQueryResponse.Text = $"Found {response.Item2} unit records since {updater.LastUpdateOn} - {response.Item1}";
+                TestUnitsQueryResponse.Text = $"Last modified date from API: { (updater.LastUpdateOn != null ? updater.LastUpdateOn.ToString() : "N/A") }\n\nFound {response.Item2} unit records: {response.Item1}";
             }
             catch (Exception ex)
             {
@@ -168,8 +185,8 @@ namespace DSA.App
 
             try
             {
-                var batches = new Updater(Opts.CurrentProfile).Run();
-                var message = $"Successfully submitted {batches.Count()} batch(es): {string.Join(", ", batches.ToArray())}";
+                var response = new Updater(Opts.CurrentProfile).Run();
+                var message = response.ToString();
                 LogClient.Log(new LogEntry(message, "INFO", Opts.CurrentProfile.ApiKey), Opts.RemoteLogging, Opts.LogUrl);
                 RunAllResponse.Text = message;
             }
@@ -191,9 +208,9 @@ namespace DSA.App
                 if (dialogResult == MessageBoxResult.OK)
                 {
                     // we can assume a user wants to save their settings
-                    var previouslySavedOn = SavedOn;
+                    var previouslySavedOn = Opts.SavedOn;
                     Save();
-                    if (previouslySavedOn == SavedOn)
+                    if (previouslySavedOn == Opts.SavedOn)
                     {
                         //save failed
                         return;
@@ -300,7 +317,7 @@ namespace DSA.App
                             break;
                     }
 
-                    var action = new ExecAction(Assembly.GetExecutingAssembly().Location, $"-s -p {Opts.CurrentProfile.Name}");
+                    var action = new ExecAction(Path.Combine(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location), "DSA.exe"), $"-r -p {Opts.CurrentProfile.Id}");
                     td.Actions.Add(action);
 
                     var newTask = ts.RootFolder.RegisterTaskDefinition($"{TaskName} ({Opts.CurrentProfile.Name})", td, TaskCreation.CreateOrUpdate, null);
@@ -338,11 +355,16 @@ namespace DSA.App
 
         private void ProfilesListbox_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
-            // Refresh all bindings
-            //DataContext = null;
-            //DataContext = Opts;
-
+            // Update profile binding
             Opts.CurrentProfileNotNull = Opts.CurrentProfile != null;
+
+            // Reset response texboxes
+            TestApiConnectivityResponse.Clear();
+            TestDataConnectivityResponse.Clear();
+            TestIncidentsQueryResponse.Clear();
+            TestUnitsQueryResponse.Clear();
+            RunAllResponse.Clear();
+            CreateTaskResponse.Clear();
 
             // Update title
             SetTitle();
@@ -353,7 +375,9 @@ namespace DSA.App
             try
             {
                 Opts.Save();
-                SavedOn = new DateTime().ToShortTimeString();
+                Opts.SavedOn = DateTime.Now.ToString();
+                SavedOnLabel.Content = Opts.SavedOn;
+                SaveOnLabelPrefix.Visibility = Visibility.Visible;
             }
             catch (Exception ex)
             {
@@ -386,6 +410,11 @@ namespace DSA.App
                 Opts.CurrentProfile = Opts.Profiles.FirstOrDefault();
                 Opts.CurrentProfileNotNull = Opts.CurrentProfile != null;
             }
+        }
+
+        private void ViewOnGithubButton_Click(object sender, RoutedEventArgs e)
+        {
+            Process.Start(GithubUrl);
         }
     }
 }

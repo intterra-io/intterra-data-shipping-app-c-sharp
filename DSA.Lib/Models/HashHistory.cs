@@ -34,4 +34,21 @@ namespace DSA.Lib.Models
             hashes.CopyTo(Units, Units.Length - 1);
         }
     }
+
+    public static class DataExtensions
+    {
+        public static bool SafeEquals(this byte[] strA, byte[] strB)
+        {
+            int length = strA.Length;
+            if (length != strB.Length)
+            {
+                return false;
+            }
+            for (int i = 0; i < length; i++)
+            {
+                if (strA[i] != strB[i]) return false;
+            }
+            return true;
+        }
+    }
 }

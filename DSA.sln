@@ -8,6 +8,9 @@ EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DSA.Application", "DSA.App\DSA.Application.csproj", "{9321FDD3-C441-49D8-990A-65061A9D60D8}"
 EndProject
 Project("{6141683F-8A12-4E36-9623-2EB02B2C2303}") = "DSA.Setup", "DSA.Setup\DSA.Setup.isproj", "{D5C17519-7EE7-4793-A0A6-113D3697714E}"
+	ProjectSection(ProjectDependencies) = postProject
+		{2558DB05-3AF2-4173-93BA-B2492B8220ED} = {2558DB05-3AF2-4173-93BA-B2492B8220ED}
+	EndProjectSection
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DSA.Console", "DSA.Console\DSA.Console.csproj", "{2558DB05-3AF2-4173-93BA-B2492B8220ED}"
 EndProject

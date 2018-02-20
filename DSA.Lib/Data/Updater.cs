@@ -14,7 +14,7 @@ using System.Security.Cryptography;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace DSA.Lib
+namespace DSA.Lib.Data
 {
     public class Updater
     {
@@ -27,98 +27,86 @@ namespace DSA.Lib
         public Updater(UpdaterProfile profile)
         {
             Profile = profile;
-            History = SettingsClient.GetHashHistory();
+            History = SettingsClient.GetHashHistory(Profile.Id);
         }
 
-        public IEnumerable<Guid> Run()
+        public UpdaterResponse Run()
         {
+            // Init 
             LastUpdateOn = GetLastUpdatedOn();
-            var transactionIds = new List<Guid>();
 
-            LastUpdateOn = GetLastUpdatedOn();
+            // Get data
             var incidents = GetIncidents();
             var units = GetUnits();
-            var supportsMultipleBatches = Profile.Driver == "mssql";
 
-            if (supportsMultipleBatches)
-            {
-                var incidentsTotal = 0;
-                if (incidents.Rows.Count > 0) incidentsTotal = int.Parse(incidents.Rows[0]["total"].ToString());
+            // Send data
+            var response = SendData(incidents, units);
 
-                var unitsTotal = 0;
-                if (units.Rows.Count > 0) unitsTotal = int.Parse(units.Rows[0]["total"].ToString());
+            // Save hashes
+            SettingsClient.SaveHashes(Profile.Id, NewHistory);
 
-                for (var i = 0; i < (int)Math.Ceiling((double)Math.Max(incidentsTotal, unitsTotal) / (double)Profile.Limit); i++)
-                {
-                    if (i > 0)
-                    {
-                        incidents = GetIncidents(i * Profile.Limit);
-                        units = GetUnits(i * Profile.Limit);
-                    }
-
-                    incidents.Columns.Remove("total");
-                    units.Columns.Remove("total");
-
-                    var result = SendData(incidents, units);
-                    transactionIds.Add(Guid.Parse(result["transactionId"]?.ToString()));
-                }
-            }
-            else
-            {
-                var result = SendData(incidents, units);
-                transactionIds.Add(Guid.Parse(result["transactionId"]?.ToString()));
-            }
-
-            SettingsClient.SaveHashes(NewHistory);
-
-            return transactionIds;
+            // Return
+            return response;
         }
 
         private byte[][] GetHashes(DataTable table)
         {
             using (var hasher = new SHA256Managed())
             {
-                return table.Rows.Cast<DataRow>().Select(x => hasher.ComputeHash(Encoding.UTF8.GetBytes(JsonConvert.SerializeObject(x)))).ToArray();
+                return table.Rows.Cast<DataRow>().Select(x => hasher.ComputeHash(Encoding.UTF8.GetBytes(JsonConvert.SerializeObject(x.ItemArray)))).ToArray();
             }
         }
 
         private void RemoveDuplicates(DataTable table, byte[][] tableHashes, byte[][] sentHashes)
         {
+            if (tableHashes == null || sentHashes == null)
+                return; // there's nothing to comare
+
             for (var i = table.Rows.Count - 1; i >= 0; i--)
             {
-                if (sentHashes.Any(x => x == tableHashes[i]))
+                if (sentHashes.Any(x => x.SafeEquals(tableHashes[i])))
                 {
                     table.Rows.RemoveAt(i);
                 }
             }
         }
 
-        private JObject SendData(DataTable incidents, DataTable units)
+        private UpdaterResponse SendData(DataTable incidents, DataTable units)
         {
+            // Init hash history
             var incidentHashes = GetHashes(incidents);
             var unitHashes = GetHashes(units);
             NewHistory.AppendIcidentHashes(incidentHashes);
             NewHistory.AppendUnitHashes(unitHashes);
 
+            // Strip duplicate data based on hash history
             if (!Profile.AllowDuplication)
             {
                 RemoveDuplicates(incidents, incidentHashes, History.Incidents);
                 RemoveDuplicates(units, unitHashes, History.Units);
             }
 
+            // Build response object 
+            var response = new UpdaterResponse() {
+                SentIncidents = incidents.Rows.Count,
+                IgnoredIncidents = incidentHashes.Count() - incidents.Rows.Count,
+                SentUnits = units.Rows.Count,
+                IgnoredUnits = unitHashes.Count() - units.Rows.Count
+            };
+
+            // Return if there is no data to send
             if (incidents.Rows.Count == 0 && units.Rows.Count == 0)
             {
-                var response = new JObject();
-                response.Add("message", "No data to send");
                 return response;
             }
 
+            // Send data
             var incidentsBytes = Encoding.UTF8.GetBytes(incidents.toCsv());
             var unitsBytes = Encoding.UTF8.GetBytes(units.toCsv());
 
             MultipartFormDataContent form = new MultipartFormDataContent();
 
-            form.Add(new StringContent(Profile.Name), "\"type\"");
+            form.Add(new StringContent(Profile.Type), "\"type\"");
 
             if (!string.IsNullOrWhiteSpace(Profile.Agency))
                 form.Add(new StringContent(Profile.Agency), "\"agency\""); // Add agency if populated
@@ -136,17 +124,25 @@ namespace DSA.Lib
                 throw new Exception($"{httpResponse.StatusCode} - {content}");
             }
 
-            return JObject.Parse(content);
+            // Parse response and return
+            Guid guid;
+            var jsonResponse = JObject.Parse(content);
+            if (Guid.TryParse(jsonResponse["transactionId"]?.ToString(), out guid))
+            {
+                response.TransactionId = guid;
+            }
+
+            return response;
         }
 
-        private DataTable GetIncidents(int offset = 0)
+        private DataTable GetIncidents()
         {
-            return GetSqlClient().GetData(Profile.GetIncidentsQuery(LastUpdateOn, offset));
+            return GetSqlClient().GetData(Profile.GetIncidentsQuery(LastUpdateOn));
         }
 
-        private DataTable GetUnits(int offset = 0)
+        private DataTable GetUnits()
         {
-            return GetSqlClient().GetData(Profile.GetUnitsQuery(LastUpdateOn, offset));
+            return GetSqlClient().GetData(Profile.GetUnitsQuery(LastUpdateOn));
         }
 
         private AuthenticationHeaderValue GetAuthHeader()
@@ -173,7 +169,10 @@ namespace DSA.Lib
             {
                 httpClient.DefaultRequestHeaders.Authorization = GetAuthHeader();
                 var response = await httpClient.PostAsync(Profile.TestUrl, new StringContent("{\"message\":\"test\"}", Encoding.UTF8, "application/json"));
-                return response.Content.ReadAsStringAsync().Result;
+                var responseStr = response.Content.ReadAsStringAsync().Result;
+
+                var jsonResult = JObject.Parse(responseStr);
+                return JsonConvert.SerializeObject(jsonResult, Formatting.Indented);
             }
         }
 

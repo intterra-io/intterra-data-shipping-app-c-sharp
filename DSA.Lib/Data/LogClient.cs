@@ -1,4 +1,5 @@
-﻿using System;
+﻿using DSA.Lib.Models;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -7,35 +8,6 @@ using System.Threading.Tasks;
 
 namespace DSA.Lib.Data
 {
-    public class LogEntry
-    {
-        public string ApplicationName { get; set; } = "DSA";
-        public string LogLevel { get; set; } = "INFO";
-        public string StackTrace { get; set; }
-        public string OccurredOn { get; set; }
-        public string GroupName { get; set; }
-        public string LogMessage { get; set; }
-        public string Username { get; set; }
-
-        public LogEntry(string message)
-        {
-            LogMessage = message;
-        }
-
-        public LogEntry(string message, string level)
-        {
-            LogMessage = message;
-            LogLevel = level;
-        }
-
-        public LogEntry(string message, string level, string username)
-        {
-            LogMessage = message;
-            LogLevel = level;
-            Username = username;
-        }
-    }
-
     public static class LogClient
     {
         const string OrgName = "Intterra";
@@ -87,7 +59,7 @@ namespace DSA.Lib.Data
             {
                 if (!remoteLogging)
                 {
-                    File.AppendAllLines(Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.CommonApplicationData), OrgName, AppName, GetLogFileName()), new[] { $"{DateTime.Now}\t{entry.LogLevel}\t{entry.LogMessage}" });
+                    File.AppendAllLines(Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.CommonApplicationData), OrgName, AppName, GetLogFileName()), new[] { $"{DateTime.Now}\t{entry.Entry.LogLevel}\t{entry.Entry.LogMessage}" });
                 }
                 else
                 {

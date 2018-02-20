@@ -24,24 +24,34 @@ namespace DSA.Console
                         throw new Exception("Profile must be specified");
                     }
 
-                    var profileName = args[profileIx + 1];
-                    var profile = opts.Profiles.FirstOrDefault(x => x.Name == profileName);
+                    var profileIdStr = args[profileIx + 1];
+                    Guid profileId;
+                    
+                    if (!Guid.TryParse(profileIdStr, out profileId))
+                    {
+                        throw new Exception($"Malformed Id: {profileIdStr}");
+                    }
+
+                    var profile = opts.Profiles.FirstOrDefault(x => x.Id == profileId);
                     if (profile == null)
                     {
-                        throw new Exception($"Profile not found: {profileName}");
+                        throw new Exception($"Profile not found: {profileId}");
                     }
 
                     // hit it!
-                    var batches = new Updater(profile).Run();
+                    var response = new Updater(profile).Run();
+
+                    // Log to console
+                    System.Console.WriteLine(response.ToString());
 
                     // log healthy activity locally
-                    var entry = new LogEntry($"Successfully submitted {batches.Count()} batch(es): {string.Join(", ", batches.ToArray())}");
-                    LogClient.Log(entry, opts.RemoteLogging, opts.LogUrl); 
+                    var entry = new LogEntry(response.ToString());
+                    LogClient.Log(entry); 
 
                     // heartbeat - lub dub
                     if (new DateTime().Minute % 10 == 0)
                     {
-                        entry.LogMessage = $"Periodic heartbeat: {entry.LogMessage}";
+                        entry.Entry.LogMessage = $"Periodic heartbeat: {entry.Entry.LogMessage}";
                         LogClient.Log(entry, opts.RemoteLogging, opts.LogUrl);
                     }
                 }
@@ -55,7 +65,7 @@ namespace DSA.Console
                         LogClient.Log(new LogEntry(ex.Message, "ERROR"), opts.RemoteLogging, opts.LogUrl); // log to intterra
                     }
 
-                    System.Console.WriteLine($"UNKNOWN ERROR:\n\n{ex.Message}");
+                    System.Console.WriteLine($"ERROR: {ex.Message}");
                     Environment.Exit(1);
                 }
                 Environment.Exit(0);

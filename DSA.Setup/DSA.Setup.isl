@@ -342,6 +342,7 @@
 		<col def="S0">ISDotNetInstallerArgsUninstall</col>
 		<col def="S0">ISDotNetInstallerArgsRollback</col>
 		<row><td>DSA.Application.Primary_output</td><td>{387C36D3-88E4-4628-98BE-410CBC191726}</td><td>INSTALLDIR</td><td>2</td><td/><td>dsa.application.primary_outp</td><td>17</td><td/><td/><td/><td>/LogFile=</td><td>/LogFile=</td><td>/LogFile=</td><td>/LogFile=</td></row>
+		<row><td>DSA.Console.Primary_output</td><td>{A727DF98-A877-471D-807D-8AA25B732AC5}</td><td>INSTALLDIR</td><td>2</td><td/><td>dsa.console.primary_output</td><td>17</td><td/><td/><td/><td>/LogFile=</td><td>/LogFile=</td><td>/LogFile=</td><td>/LogFile=</td></row>
 		<row><td>ISX_DEFAULTCOMPONENT</td><td>{09EB0EB7-16A1-4726-990A-C9BAC331EC19}</td><td>INSTALLDIR</td><td>2</td><td/><td/><td>17</td><td/><td/><td/><td>/LogFile=</td><td>/LogFile=</td><td>/LogFile=</td><td>/LogFile=</td></row>
 	</table>
 
@@ -1053,6 +1054,7 @@
 		<col key="yes" def="s72">Directory_</col>
 		<col key="yes" def="s72">Component_</col>
 		<row><td>INSTALLDIR</td><td>DSA.Application.Primary_output</td></row>
+		<row><td>INSTALLDIR</td><td>DSA.Console.Primary_output</td></row>
 		<row><td>INSTALLDIR</td><td>ISX_DEFAULTCOMPONENT</td></row>
 	</table>
 
@@ -1869,6 +1871,7 @@
 		<col key="yes" def="s38">Feature_</col>
 		<col key="yes" def="s72">Component_</col>
 		<row><td>AlwaysInstall</td><td>DSA.Application.Primary_output</td></row>
+		<row><td>AlwaysInstall</td><td>DSA.Console.Primary_output</td></row>
 		<row><td>AlwaysInstall</td><td>ISX_DEFAULTCOMPONENT</td></row>
 	</table>
 
@@ -1885,6 +1888,7 @@
 		<col def="I4">ISAttributes</col>
 		<col def="S72">ISComponentSubFolder_</col>
 		<row><td>dsa.application.primary_outp</td><td>DSA.Application.Primary_output</td><td>DSA.Application.Primary output</td><td>0</td><td/><td/><td/><td>1</td><td>&lt;DSA.Application&gt;|Built</td><td>3</td><td/></row>
+		<row><td>dsa.console.primary_output</td><td>DSA.Console.Primary_output</td><td>DSA.Console.Primary output</td><td>0</td><td/><td/><td/><td>1</td><td>&lt;DSA.Console&gt;|Built</td><td>3</td><td/></row>
 	</table>
 
 	<table name="FileSFPCatalog">
@@ -2027,6 +2031,7 @@
 		<col def="S0">HTTPLocation</col>
 		<col def="S0">Miscellaneous</col>
 		<row><td>DSA.Application.Primary_output</td><td/><td/><td>_C6E75959_2B64_4B2A_B2DD_68DC6B31834C_FILTER</td><td/><td/><td/><td/></row>
+		<row><td>DSA.Console.Primary_output</td><td/><td/><td>_DC2AA3E4_F26E_4162_88F9_1E60810A255E_FILTER</td><td/><td/><td/><td/></row>
 		<row><td>ISX_DEFAULTCOMPONENT</td><td/><td/><td>_1C69C096_FA67_4E6E_A0FB_CFAD2A616B87_FILTER</td><td/><td/><td/><td/></row>
 	</table>
 
@@ -2307,6 +2312,7 @@
 		<col def="i4">Type</col>
 		<row><td>CommonFilesFolder</td><td/><td/><td>1</td></row>
 		<row><td>DSA.Application</td><td>DSA.App\DSA.Application.csproj</td><td/><td>2</td></row>
+		<row><td>DSA.Console</td><td>DSA.Console\DSA.Console.csproj</td><td/><td>2</td></row>
 		<row><td>ISPROJECTDIR</td><td/><td/><td>1</td></row>
 		<row><td>ISProductFolder</td><td/><td/><td>1</td></row>
 		<row><td>ISProjectDataFolder</td><td/><td/><td>1</td></row>
@@ -3720,7 +3726,7 @@
 		<row><td>IDS__TargetReq_DESC_RAM</td><td>1033</td><td>The amount of RAM is not adequate for running [ProductName].</td><td>0</td><td/><td>2091238128</td></row>
 		<row><td>IDS__TargetReq_DESC_RESOLUTION</td><td>1033</td><td>The screen resolution is not adequate for running [ProductName].</td><td>0</td><td/><td>2091238128</td></row>
 		<row><td>ID_STRING1</td><td>1033</td><td/><td>0</td><td/><td>2091240176</td></row>
-		<row><td>ID_STRING2</td><td>1033</td><td>http://www.Intterra.com</td><td>0</td><td/><td>-1666885141</td></row>
+		<row><td>ID_STRING2</td><td>1033</td><td>http://www.intterragroup.com</td><td>0</td><td/><td>-1591311505</td></row>
 		<row><td>ID_STRING3</td><td>1033</td><td>Intterra</td><td>0</td><td/><td>-1666885141</td></row>
 		<row><td>IIDS_UITEXT_FeatureUninstalled</td><td>1033</td><td>This feature will remain uninstalled.</td><td>0</td><td/><td>2091238128</td></row>
 	</table>
@@ -4348,7 +4354,7 @@ UwBpAG4AZwBsAGUASQBtAGEAZwBlAAEARQB4AHAAcgBlAHMAcwA=
 		<row><td>PROGRAMFILETOLAUNCHATEND</td><td>[INSTALLDIR]DSA.Application.Primary output</td><td/></row>
 		<row><td>ProductCode</td><td>{93BCAF47-3909-444A-83D8-7522302881C3}</td><td/></row>
 		<row><td>ProductName</td><td>Data Shipping App</td><td/></row>
-		<row><td>ProductVersion</td><td>2.1.0</td><td/></row>
+		<row><td>ProductVersion</td><td>3.0.0</td><td/></row>
 		<row><td>ProgressType0</td><td>install</td><td/></row>
 		<row><td>ProgressType1</td><td>Installing</td><td/></row>
 		<row><td>ProgressType2</td><td>installed</td><td/></row>
