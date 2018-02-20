@@ -40,8 +40,18 @@
                                 <ComboBox ItemsSource="{Binding Path=ProfileTypes}" SelectedValue="{Binding CurrentProfile.Type}" Style="{StaticResource DarkCombobox}" />
                                 <Label Content="Agency (optional)" Style="{StaticResource DarkLabel}"/>
                                 <TextBox Text="{Binding CurrentProfile.Agency, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Style="{StaticResource InputTextBox}" />
-                                <Label Content="Share runtime logs with Intterra" Style="{StaticResource DarkLabel}"/>
-                                <CheckBox IsChecked="{Binding RemoteLogging, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Margin="10 0 10 10" />
+                                <GroupBox Header="Options" Margin="10 10 10 10">
+                                    <WrapPanel>
+                                        <StackPanel Orientation="Horizontal">
+                                            <CheckBox IsChecked="{Binding RemoteLogging, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" VerticalAlignment="Center" />
+                                            <Label Content="Share runtime logs with Intterra" Style="{StaticResource DarkLabel}"/>
+                                        </StackPanel>
+                                        <StackPanel Orientation="Horizontal">
+                                            <CheckBox IsChecked="{Binding AllowDuplication, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" VerticalAlignment="Center" />
+                                            <Label Content="Allow sending of duplicate data" Style="{StaticResource DarkLabel}"/>
+                                        </StackPanel>
+                                    </WrapPanel>
+                                </GroupBox>
                                 <Button x:Name="DeleteProfile" Content="Delete Profile" Width="100" Background="White" Foreground="#C2322E" Margin="10 10 10 0" Click="DeleteProfile_Click" >
                                     <Button.Template>
                                         <ControlTemplate TargetType="{x:Type Button}">

@@ -10,6 +10,7 @@ using System.Globalization;
 using System.Linq;
 using System.Net.Http;
 using System.Net.Http.Headers;
+using System.Security.Cryptography;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -18,11 +19,15 @@ namespace DSA.Lib
     public class Updater
     {
         public UpdaterProfile Profile { get; set; }
+        public HashHistory History { get; set; }
         public DateTime? LastUpdateOn { get; private set; }
+
+        private HashHistory NewHistory = new HashHistory();
 
         public Updater(UpdaterProfile profile)
         {
             Profile = profile;
+            History = SettingsClient.GetHashHistory();
         }
 
         public IEnumerable<Guid> Run()
@@ -64,15 +69,47 @@ namespace DSA.Lib
                 transactionIds.Add(Guid.Parse(result["transactionId"]?.ToString()));
             }
 
+            SettingsClient.SaveHashes(NewHistory);
+
             return transactionIds;
+        }
+
+        private byte[][] GetHashes(DataTable table)
+        {
+            using (var hasher = new SHA256Managed())
+            {
+                return table.Rows.Cast<DataRow>().Select(x => hasher.ComputeHash(Encoding.UTF8.GetBytes(JsonConvert.SerializeObject(x)))).ToArray();
+            }
+        }
+
+        private void RemoveDuplicates(DataTable table, byte[][] tableHashes, byte[][] sentHashes)
+        {
+            for (var i = table.Rows.Count - 1; i >= 0; i--)
+            {
+                if (sentHashes.Any(x => x == tableHashes[i]))
+                {
+                    table.Rows.RemoveAt(i);
+                }
+            }
         }
 
         private JObject SendData(DataTable incidents, DataTable units)
         {
+            var incidentHashes = GetHashes(incidents);
+            var unitHashes = GetHashes(units);
+            NewHistory.AppendIcidentHashes(incidentHashes);
+            NewHistory.AppendUnitHashes(unitHashes);
+
+            if (!Profile.AllowDuplication)
+            {
+                RemoveDuplicates(incidents, incidentHashes, History.Incidents);
+                RemoveDuplicates(units, unitHashes, History.Units);
+            }
+
             if (incidents.Rows.Count == 0 && units.Rows.Count == 0)
             {
                 var response = new JObject();
-                response.Add("message", "No data to send" );
+                response.Add("message", "No data to send");
                 return response;
             }
 
@@ -179,7 +216,7 @@ namespace DSA.Lib
 
             var result = JObject.Parse(Http.Post(Profile.LastDatetimeUrl, new NameValueCollection()
             {
-                { "type", Profile.Name },
+                { "type", Profile.Type },
                 { "apiKey", Profile.ApiKey },
                 { "apiKeySecret", Profile.ApiKeySecret }
             }));

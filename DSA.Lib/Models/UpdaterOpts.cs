@@ -53,6 +53,7 @@ namespace DSA.Lib.Models
         public string ApiKeySecret { get; set; }
         public int Limit { get; set; }
         public string Agency { get; set; }
+        public bool AllowDuplication { get; set; } = false;
 
         public string IncidentsSelect { get; set; }
         public string IncidentsFrom { get; set; }

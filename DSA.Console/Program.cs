@@ -15,7 +15,7 @@ namespace DSA.Console
                 UpdaterOpts opts = null;
                 try
                 {
-                    opts = SettingsClient.Get();
+                    opts = SettingsClient.GetSettings();
                     LogClient.Init();
 
                     var profileIx = Array.FindIndex(args, x => x == "-p" || x == "--profile");

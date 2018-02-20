@@ -51,6 +51,7 @@
     <Compile Include="Data\LogClient.cs" />
     <Compile Include="Data\SettingsClient.cs" />
     <Compile Include="Data\TimezoneConverter.cs" />
+    <Compile Include="Models\HashHistory.cs" />
     <Compile Include="Models\UpdaterOpts.cs" />
     <Compile Include="Updater.cs" />
     <Compile Include="Data\Http.cs" />

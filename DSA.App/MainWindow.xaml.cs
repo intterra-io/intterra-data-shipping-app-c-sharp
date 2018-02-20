@@ -18,7 +18,7 @@ namespace DSA.App
     /// </summary>
     public partial class MainWindow : Window
     {
-        public UpdaterOpts Opts { get; set; } = SettingsClient.Get();
+        public UpdaterOpts Opts { get; set; } = SettingsClient.GetSettings();
         public string SavedOn { get; set; } = "";
 
         const string TaskName = "Intterra Data Shipping App";

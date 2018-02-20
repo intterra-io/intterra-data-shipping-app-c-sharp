@@ -13,7 +13,8 @@ namespace DSA.Lib.Data
     {
         const string OrgName = "Intterra";
         const string AppName = "DSA";
-        const string FileName = "settings.json";
+        const string SettingsFileName = "settings.json";
+        const string HashHistoryFileName = "hash.json";
 
         public static void Init()
         {
@@ -34,13 +35,13 @@ namespace DSA.Lib.Data
             }
         }
 
-        public static UpdaterOpts Get()
+        public static UpdaterOpts GetSettings()
         {
             UpdaterOpts opts = null;
 
             try
             {
-                opts = JsonConvert.DeserializeAnonymousType(File.ReadAllText(GetSettingsPath()), opts);
+                opts = JsonConvert.DeserializeAnonymousType(File.ReadAllText(GetSettingsFilePath()), opts);
             }
             catch (Exception ex)
             {
@@ -55,9 +56,26 @@ namespace DSA.Lib.Data
             return opts;
         }
 
+        public static HashHistory GetHashHistory()
+        {
+            HashHistory opts = null;
+
+            try
+            {
+                opts = JsonConvert.DeserializeAnonymousType(File.ReadAllText(GetHistoryFilePath()), opts);
+            }
+            catch (Exception ex)
+            {
+                // something went wrong - either this is first time or malformed object
+                opts = new HashHistory();
+            }
+
+            return opts;
+        }
+
         public static bool HasChanges(UpdaterOpts inMemSettings)
         {
-            var persistentSettings = Get();
+            var persistentSettings = GetSettings();
 
             return JsonConvert.SerializeObject(persistentSettings) != JsonConvert.SerializeObject(inMemSettings);
         }
@@ -114,12 +132,23 @@ namespace DSA.Lib.Data
             }
 
             // Hit it!
-            File.WriteAllText(GetSettingsPath(), JsonConvert.SerializeObject(opts, Formatting.Indented));
+            File.WriteAllText(GetSettingsFilePath(), JsonConvert.SerializeObject(opts, Formatting.Indented));
         }
 
-        private static string GetSettingsPath()
+        public static void SaveHashes(HashHistory opts)
         {
-            return Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.CommonApplicationData), OrgName, AppName, FileName);
+            // Hit it!
+            File.WriteAllText(GetHistoryFilePath(), JsonConvert.SerializeObject(opts, Formatting.None));
+        }
+
+        private static string GetHistoryFilePath()
+        {
+            return Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.CommonApplicationData), OrgName, AppName, HashHistoryFileName);
+        }
+
+        private static string GetSettingsFilePath()
+        {
+            return Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.CommonApplicationData), OrgName, AppName, SettingsFileName);
         }
     }
 }
