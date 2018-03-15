@@ -1,6 +1,7 @@
 ﻿using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Globalization;
 using System.Linq;
 using System.Text;
@@ -9,16 +10,38 @@ namespace DSA.Lib.Models
 {
     public class UpdaterOpts
     {
-        public string CurrentProfileName { get; set; } = "analytics";
+        public Guid CurrentProfileId { get; set; }
+        public IReadOnlyList<string> DbDrivers { get; } = new List<string>(new[] { "mssql", "odbc" }).AsReadOnly();
+        public IReadOnlyList<string> ProfileTypes { get; } = new List<string>(new[] { "analytics", "sitstat" }).AsReadOnly();
+        public ObservableCollection<UpdaterProfile> Profiles { get; } = new ObservableCollection<UpdaterProfile>();
+        public string LogUrl { get; set; }
+        public bool RemoteLogging { get; set; } = true;
+
+        [JsonIgnore]
+        public string SavedOn { get; set; } = "";
         [JsonIgnore]
         public UpdaterProfile CurrentProfile { get; set; }
-        public IReadOnlyList<string> DbDrivers { get; } = new List<string>(new[] { "mssql", "odbc" }).AsReadOnly();
-        public Dictionary<string, UpdaterProfile> Profiles { get; } = new Dictionary<string, UpdaterProfile>();
+        [JsonIgnore]
+        public bool CurrentProfileNotNull { get; set; } = false;
+
+        public UpdaterOpts()
+        {
+            if (string.IsNullOrWhiteSpace(LogUrl))
+            {
+#if DEBUG
+                LogUrl = "https://portal-dev.intterragroup.com/api/logs/create";
+#else
+                LogUrl = "https://portal.intterragroup.com/api/logs/create";
+#endif
+            }
+        }
     }
 
     public class UpdaterProfile
     {
+        public Guid Id { get; set; } = Guid.NewGuid();
         public string Name { get; set; }
+        public string Type { get; set; }
         public string LastDatetimeUrl { get; set; }
         public string DataUrl { get; set; }
         public string TestUrl { get; set; }
@@ -32,33 +55,23 @@ namespace DSA.Lib.Models
         public string ConnectionString { get; set; }
         public string ApiKey { get; set; }
         public string ApiKeySecret { get; set; }
-        public int Limit { get; set; }
         public string Agency { get; set; }
+        public bool AllowDuplication { get; set; } = false;
+        public string IncidentsQuery { get; set; }
+        public string UnitsQuery { get; set; }
 
-        public string IncidentsSelect { get; set; }
-        public string IncidentsFrom { get; set; }
-        public string IncidentsWhere { get; set; }
-        public string IncidentsOrderBy { get; set; }
-
-        public string UnitsSelect { get; set; }
-        public string UnitsFrom { get; set; }
-        public string UnitsWhere { get; set; }
-        public string UnitsOrderBy { get; set; }
-
-        public string GetIncidentsQuery(DateTime? lastUpdatedOn, int page = 0)
+        public string GetIncidentsQuery(DateTime? lastUpdatedOn)
         {
-            return ReplacePlaceQueryPlaceholders(BuildQuery(IncidentsSelect, IncidentsFrom, IncidentsWhere, IncidentsOrderBy), lastUpdatedOn, page);
+            return ReplacePlaceQueryPlaceholders(IncidentsQuery, lastUpdatedOn);
         }
 
-        public string GetUnitsQuery(DateTime? lastUpdatedOn, int page = 0)
+        public string GetUnitsQuery(DateTime? lastUpdatedOn)
         {
-            return ReplacePlaceQueryPlaceholders(BuildQuery(UnitsSelect, UnitsFrom, UnitsWhere, UnitsOrderBy), lastUpdatedOn, page);
+            return ReplacePlaceQueryPlaceholders(UnitsQuery, lastUpdatedOn);
         }
 
-        private string ReplacePlaceQueryPlaceholders(string query, DateTime? lastUpdatedOn, int page)
+        private string ReplacePlaceQueryPlaceholders(string query, DateTime? lastUpdatedOn)
         {
-            query = query.Replace("{{PAGE}}", page.ToString());
-
             if (lastUpdatedOn != null)
             {
                 query = query.Replace("{{LASTUPDATEDDATETIME}}", ((DateTime)lastUpdatedOn).ToString("yyyy-MM-dd HH:mm:ss", CultureInfo.InvariantCulture));
@@ -67,24 +80,25 @@ namespace DSA.Lib.Models
             return query;
         }
 
-        private string BuildQuery(string select, string from, string where, string orderBy)
-        {
-            //return $"SELECT {select}, COUNT(*) OVER() as total FROM {from} WHERE {where} ORDER BY {orderBy} OFFSET {{{{PAGE}}}} ROWS FETCH NEXT {Limit} ROWS ONLY";
-            where = string.IsNullOrWhiteSpace(where) ? "1=1" : where;
-
-            if (Driver == "mssql")
-            {
-                return $"SELECT * FROM ( SELECT {select}, ROW_NUMBER() OVER (ORDER BY {orderBy}) AS seqence, COUNT(*) OVER () as total FROM {from} WHERE {where} ) as x WHERE seqence BETWEEN {{{{PAGE}}}} AND {{{{PAGE}}}} + {Limit}";
-            }
-            else
-            {
-                return $"SELECT {select} FROM {from} WHERE {where}";
-            }
-        }
-
         public bool UsesLastUpdatedDatetime()
         {
-            return (new[] { IncidentsWhere, IncidentsOrderBy, UnitsWhere, UnitsOrderBy }).Any(x => x.Contains("{{LASTUPDATEDDATETIME}}"));
+            return (new[] { IncidentsQuery, UnitsQuery})
+                .Where(x => !string.IsNullOrWhiteSpace(x)) // filter out empty queries
+                .Any(x => x.Contains("{{LASTUPDATEDDATETIME}}"));
+        }
+    }
+
+    public class UpdaterResponse
+    {
+        public int SentIncidents { get; set; }
+        public int IgnoredIncidents { get; set; }
+        public int SentUnits { get; set; }
+        public int IgnoredUnits { get; set; }
+        public Guid TransactionId { get; set; }
+
+        public override string ToString()
+        {
+            return $"Batch uuid: {(TransactionId != Guid.Empty ? TransactionId.ToString() : "N/A")}\n\nSent Incidents: {SentIncidents}\nIgnored Incidents: {IgnoredIncidents}\nSent Units: {SentUnits}\nIgnored Units: {IgnoredUnits}";
         }
     }
 }

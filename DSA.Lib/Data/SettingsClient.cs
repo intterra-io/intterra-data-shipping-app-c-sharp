@@ -13,7 +13,8 @@ namespace DSA.Lib.Data
     {
         const string OrgName = "Intterra";
         const string AppName = "DSA";
-        const string FileName = "settings.json";
+        const string SettingsFileName = "settings.json";
+        const string HashHistoryFileSuffix = ".hash.json";
 
         public static void Init()
         {
@@ -34,92 +35,66 @@ namespace DSA.Lib.Data
             }
         }
 
-        public static UpdaterOpts Get()
+        public static UpdaterOpts GetSettings()
         {
             UpdaterOpts opts = null;
 
             try
             {
-                opts = JsonConvert.DeserializeAnonymousType(File.ReadAllText(GetSettingsPath()), opts);
+                opts = JsonConvert.DeserializeAnonymousType(File.ReadAllText(GetSettingsFilePath()), opts);
             }
-            catch (Exception ex)
+            catch (Exception)
             {
-                LogClient.Log(ex.Message);
-
                 // something went wrong - either this is first time or malformed object
                 opts = new UpdaterOpts();
             }
 
             // ensure profiles are created as expected
-            if (!opts.Profiles.ContainsKey("analytics"))
-                opts.Profiles["analytics"] = GetDefaultAnalyticsProfile();
-
-            if (!opts.Profiles.ContainsKey("sitstat"))
-                opts.Profiles["sitstat"] = GetDefaultSitstatProfile();
+            if (opts.Profiles.Count == 0)
+                opts.Profiles.Add(GetDefaultProfile());
 
             return opts;
         }
 
-        public static UpdaterProfile GetDefaultAnalyticsProfile()
+        public static HashHistory GetHashHistory(Guid profileId)
         {
-            return new UpdaterProfile()
+            HashHistory opts = null;
+
+            try
             {
-                Name = "analytics",
+                opts = JsonConvert.DeserializeAnonymousType(File.ReadAllText(GetHistoryFilePath(profileId)), opts);
+            }
+            catch (Exception)
+            {
+                // something went wrong - either this is first time or malformed object
+                opts = new HashHistory();
+            }
 
-                RunInterval = -1,
-                RunIntervalTimeUnit = "hours",
-
-                IncidentsSelect = "*",
-                IncidentsFrom = "dbo.incidents",
-                IncidentsWhere = "last_updated_rms > '{{LASTUPDATEDDATETIME}}'",
-                IncidentsOrderBy = "incident_datetime",
-
-                UnitsSelect = "*",
-                UnitsFrom = "dbo.units",
-                UnitsWhere = "last_updated_rms > '{{LASTUPDATEDDATETIME}}'",
-                UnitsOrderBy = "last_updated_rms",
-
-                Driver = "mssql",
-                ConnectionString = "Data Source=ServerName,Initial Catalog=DatabaseName,User Id=userid,Password=password",
-                ApiKey = "",
-                ApiKeySecret = "",
-                Limit = 500000,
-#if DEBUG
-                LastDatetimeUrl = "http://localhost:8000/v1/data/get-last-datetime",
-                DataUrl = "http://localhost:8000/v1/data/add",
-                TestUrl = "http://localhost:8000/v1/keys/test",
-#else
-                LastDatetimeUrl = "https://dc.intterragroup.com/v1/data/get-last-datetime",
-                DataUrl = "https://dc.intterragroup.com/v1/data/add",
-                TestUrl = "https://dc.intterragroup.com/v1/keys/test",
-#endif
-            };
+            return opts;
         }
 
-        public static UpdaterProfile GetDefaultSitstatProfile()
+        public static bool HasChanges(UpdaterOpts inMemSettings)
+        {
+            var persistentSettings = GetSettings();
+
+            return JsonConvert.SerializeObject(persistentSettings) != JsonConvert.SerializeObject(inMemSettings);
+        }
+
+        public static UpdaterProfile GetDefaultProfile()
         {
             return new UpdaterProfile()
             {
-                Name = "sitstat",
-
-                RunInterval = 15,
-                RunIntervalTimeUnit = "seconds",
-
-                IncidentsSelect = "*",
-                IncidentsFrom = "dbo.incident_summary",
-                IncidentsWhere = "last_updated_rms > '{{LASTUPDATEDDATETIME}}'",
-                IncidentsOrderBy = "incident_datetime",
-
-                UnitsSelect = "*",
-                UnitsFrom = "dbo.unit_summary",
-                UnitsWhere = "last_updated_rms > '{{LASTUPDATEDDATETIME}}'",
-                UnitsOrderBy = "last_updated_rms",
-
+                Id = Guid.NewGuid(),
+                Name = "Default Profile",
+                Type = "analytics",
+                RunInterval = -1,
+                RunIntervalTimeUnit = "hours",
+                IncidentsQuery = "SELECT * \nFROM dbo.incidents \nWHERE last_updated_rms > '{{LASTUPDATEDDATETIME}}' \nORDER BY incident_datetime;",
+                UnitsQuery = "SELECT * \nFROM dbo.units \nWHERE last_updated_rms > '{{LASTUPDATEDDATETIME}}' \nORDER BY last_updated_rms;",
                 Driver = "mssql",
-                ConnectionString = @"Data Source=.\SQLEXPRESS,Initial Catalog=sandbox,Integrated Security=true",
+                ConnectionString = "Data Source=my_server;Initial Catalog=my_db;User Id=my_uid; Password=my_password",
                 ApiKey = "",
                 ApiKeySecret = "",
-                Limit = -1,
 #if DEBUG
                 LastDatetimeUrl = "http://localhost:8000/v1/data/get-last-datetime",
                 DataUrl = "http://localhost:8000/v1/data/add",
@@ -134,13 +109,38 @@ namespace DSA.Lib.Data
 
         public static void Save(this UpdaterOpts opts)
         {
+            // make sure we don't have any duplicate profiles
+            var dups = opts.Profiles.GroupBy(x => x.Id).Where(group => group.Count() > 1);
+            if (dups.Count() > 0)
+            {
+                throw new Exception($"Duplicate profile names: {string.Join(",", dups)}");
+            }
 
-            File.WriteAllText(GetSettingsPath(), JsonConvert.SerializeObject(opts, Formatting.Indented));
+            // Set current profile name (so we can load it on next startup)
+            if (opts.CurrentProfile != null)
+            {
+                opts.CurrentProfileId = opts.CurrentProfile.Id;
+            }
+
+            // Hit it!
+            File.WriteAllText(GetSettingsFilePath(), JsonConvert.SerializeObject(opts, Formatting.Indented));
         }
 
-        private static string GetSettingsPath()
+        public static void SaveHashes(Guid profileId, HashHistory opts)
         {
-            return Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.CommonApplicationData), OrgName, AppName, FileName);
+            // Hit it!
+            File.WriteAllText(GetHistoryFilePath(profileId), JsonConvert.SerializeObject(opts, Formatting.None));
+        }
+
+        private static string GetHistoryFilePath(Guid profileId)
+        {
+            var idStr = profileId.ToString().ToLower();
+            return Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.CommonApplicationData), OrgName, AppName, $"{idStr}{HashHistoryFileSuffix}" );
+        }
+
+        private static string GetSettingsFilePath()
+        {
+            return Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.CommonApplicationData), OrgName, AppName, SettingsFileName);
         }
     }
 }

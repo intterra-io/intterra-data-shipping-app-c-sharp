@@ -129,7 +129,11 @@ namespace DSA.Lib.Data
             {
                 for (int i = 0; i < datatable.Columns.Count; i++)
                 {
-                    sb.Append(dr[i].ToString().Replace("\t", "    "));
+                    sb.Append(dr[i].ToString()
+                        .Replace("\t", "    ") // replace tabs
+                        .Replace("\"", "'") // replace double quotes
+                        .Replace("\n", " ") // replace new lines
+                        .Replace("\r", " ")); // replace line feeds
 
                     if (i < datatable.Columns.Count - 1)
                         sb.Append(seperator);

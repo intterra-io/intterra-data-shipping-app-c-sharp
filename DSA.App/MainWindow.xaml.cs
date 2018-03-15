@@ -5,6 +5,7 @@ using Microsoft.Win32.TaskScheduler;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Security.Principal;
@@ -18,26 +19,49 @@ namespace DSA.App
     /// </summary>
     public partial class MainWindow : Window
     {
-        public UpdaterOpts Opts { get; set; } = SettingsClient.Get();
+        public UpdaterOpts Opts { get; set; } = SettingsClient.GetSettings();
 
         const string TaskName = "Intterra Data Shipping App";
         const string TaskDescription = "Reads incident response data from CAD, AVL, and/or RMS data sources as configured and sends to Intterra's secure API";
+        const string GithubUrl = "https://github.com/intterra/intterra-data-shipping-app-c-sharp";
 
         public MainWindow()
         {
             InitializeComponent();
 
-            // Init profile button
-            ToggleProfileClick(Opts.CurrentProfileName == "analytics" ? ProfileAnalyticsButton : ProfileSitstatButton, null);
-
             DataContext = Opts;
 
+            if (Opts.CurrentProfileId != Guid.Empty)
+            {
+                Opts.CurrentProfile = Opts.Profiles.FirstOrDefault(x => x.Id == Opts.CurrentProfileId);
+            }
+
+            if (Opts.CurrentProfile == null)
+            {
+                Opts.CurrentProfile = Opts.Profiles.FirstOrDefault();
+            }
+
+            Opts.CurrentProfileNotNull = Opts.CurrentProfile != null;
+
             SetTitle();
+            VersionLabel.Content = Assembly.GetEntryAssembly().GetName().Version;
+            DsaAppWindow.ContentRendered += DsaAppWindow_ContentRendered;
+        }
+
+        private void DsaAppWindow_ContentRendered(object sender, EventArgs e)
+        {
+            // jump to and create schedule 
+            if (Environment.GetCommandLineArgs().Contains("--schedule"))
+            {
+                Tabs.SelectedIndex = Tabs.Items.Count - 1;
+                CreateTask();
+            }
         }
 
         private void SetTitle()
         {
-            var newTitle = $"{TaskName} [{Opts.CurrentProfileName}]";
+            var newTitle = $"{TaskName}";
+            newTitle += Opts.CurrentProfile != null ? $" [{Opts.CurrentProfile.Name}]" : "";
             newTitle += IsAdministrator() ? " (Administrator)" : "";
             Title = newTitle;
         }
@@ -63,9 +87,34 @@ namespace DSA.App
 
         protected override void OnClosing(System.ComponentModel.CancelEventArgs e)
         {
-            Opts.Save();
+            if (SettingsClient.HasChanges(Opts))
+            {
+                var previouslySavedOn = Opts.SavedOn;
+                var dialogResult = MessageBox.Show("There are unsaved changes, would you like to save?", "Save Changes", MessageBoxButton.YesNoCancel);
+                if (dialogResult == MessageBoxResult.Yes)
+                {
+                    Save();
 
-            base.OnClosing(e);
+                    // Cancel closing event if save failed
+                    if (previouslySavedOn == Opts.SavedOn)
+                    {
+                        e.Cancel = true;
+                    }
+                }
+                else if (dialogResult == MessageBoxResult.Cancel)
+                {
+                    e.Cancel = true;
+                    base.OnClosing(e);
+                }
+                else
+                {
+                    base.OnClosing(e);
+                }
+            }
+            else
+            {
+                base.OnClosing(e);
+            }
         }
 
         private async void TestDataConnectivityClick(object sender, RoutedEventArgs e)
@@ -96,7 +145,7 @@ namespace DSA.App
             {
                 var updater = new Updater(Opts.CurrentProfile);
                 var response = await updater.TestIncidentsQuery();
-                TestIncidentsQueryResponse.Text = $"Found {response.Item2} incident records since {updater.LastUpdateOn} - {response.Item1}";
+                TestIncidentsQueryResponse.Text = $"Last modified date from API: { (updater.LastUpdateOn != null ? updater.LastUpdateOn.ToString() : "N/A") }\n\nFound {response.Item2} incident records: {response.Item1}";
             }
             catch (Exception ex)
             {
@@ -117,7 +166,7 @@ namespace DSA.App
             {
                 var updater = new Updater(Opts.CurrentProfile);
                 var response = await updater.TestUnitsQuery();
-                TestUnitsQueryResponse.Text = $"Found {response.Item2} unit records since {updater.LastUpdateOn} - {response.Item1}";
+                TestUnitsQueryResponse.Text = $"Last modified date from API: { (updater.LastUpdateOn != null ? updater.LastUpdateOn.ToString() : "N/A") }\n\nFound {response.Item2} unit records: {response.Item1}";
             }
             catch (Exception ex)
             {
@@ -136,9 +185,9 @@ namespace DSA.App
 
             try
             {
-                var batches = new Updater(Opts.CurrentProfile).Run();
-                var message = $"Successfully submitted {batches.Count()} batch(es): {string.Join(", ", batches.ToArray())}";
-                LogClient.Log(message);
+                var response = new Updater(Opts.CurrentProfile).Run();
+                var message = response.ToString();
+                LogClient.Log(new LogEntry(message, "INFO", Opts.CurrentProfile.ApiKey), Opts.RemoteLogging, Opts.LogUrl);
                 RunAllResponse.Text = message;
             }
             catch (Exception ex)
@@ -158,9 +207,19 @@ namespace DSA.App
                 var dialogResult = MessageBox.Show("This function requires Adminitrator privileges.\n\nRestart in Admin mode?", "Administrator Required", MessageBoxButton.OKCancel);
                 if (dialogResult == MessageBoxResult.OK)
                 {
+                    // we can assume a user wants to save their settings
+                    var previouslySavedOn = Opts.SavedOn;
+                    Save();
+                    if (previouslySavedOn == Opts.SavedOn)
+                    {
+                        //save failed
+                        return;
+                    }
+
                     var proc = new ProcessStartInfo();
                     proc.UseShellExecute = true;
                     proc.FileName = Assembly.GetExecutingAssembly().Location;
+                    proc.Arguments = "--schedule";
                     proc.Verb = "runas";
 
                     try
@@ -179,6 +238,11 @@ namespace DSA.App
                 }
             }
 
+            CreateTask();
+        }
+
+        private void CreateTask()
+        {
             CreateTaskResponse.Text = "Working...";
             CreateTaskButton.IsEnabled = false;
             var taskMessage = string.Empty;
@@ -253,7 +317,7 @@ namespace DSA.App
                             break;
                     }
 
-                    var action = new ExecAction(Assembly.GetExecutingAssembly().Location, $"-s -p {Opts.CurrentProfile.Name}");
+                    var action = new ExecAction(Path.Combine(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location), "DSA.exe"), $"-r -p {Opts.CurrentProfile.Id}");
                     td.Actions.Add(action);
 
                     var newTask = ts.RootFolder.RegisterTaskDefinition($"{TaskName} ({Opts.CurrentProfile.Name})", td, TaskCreation.CreateOrUpdate, null);
@@ -271,6 +335,11 @@ namespace DSA.App
             }
         }
 
+        private void SaveButtonClick(object sender, RoutedEventArgs e)
+        {
+            Save();
+        }
+
         private void NextButtonClick(object sender, RoutedEventArgs e)
         {
             if (Tabs.SelectedIndex != Tabs.Items.Count - 1)
@@ -284,38 +353,68 @@ namespace DSA.App
                 Tabs.SelectedIndex--;
         }
 
-        private void ToggleProfileClick(object sender, RoutedEventArgs e)
+        private void ProfilesListbox_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
-            var normalStyle = Application.Current.Resources["SegmentButton"] as Style;
-            var selectedStyle = Application.Current.Resources["SegmentButtonSelected"] as Style;
+            // Update profile binding
+            Opts.CurrentProfileNotNull = Opts.CurrentProfile != null;
 
-            ProfileAnalyticsButton.Style = normalStyle;
-            ProfileSitstatButton.Style = normalStyle;
-            (sender as Button).Style = selectedStyle;
-
-            if (sender == ProfileAnalyticsButton)
-            {
-                Opts.CurrentProfileName = "analytics";
-            }
-            else if (sender == ProfileSitstatButton)
-            {
-                Opts.CurrentProfileName = "sitstat";
-            }
-
-            Opts.CurrentProfile = Opts.Profiles[Opts.CurrentProfileName];
-
-            // Refresh all bindings
-            DataContext = null;
-            DataContext = Opts;
+            // Reset response texboxes
+            TestApiConnectivityResponse.Clear();
+            TestDataConnectivityResponse.Clear();
+            TestIncidentsQueryResponse.Clear();
+            TestUnitsQueryResponse.Clear();
+            RunAllResponse.Clear();
+            CreateTaskResponse.Clear();
 
             // Update title
             SetTitle();
+        }
+
+        private void Save()
+        {
+            try
+            {
+                Opts.Save();
+                Opts.SavedOn = DateTime.Now.ToString();
+                SavedOnLabel.Content = Opts.SavedOn;
+                SaveOnLabelPrefix.Visibility = Visibility.Visible;
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Problem saving settings:\n\n{ex.Message}", "Whoops!", MessageBoxButton.OK);
+            }
         }
 
         private bool IsAdministrator()
         {
             return (new WindowsPrincipal(WindowsIdentity.GetCurrent()))
                       .IsInRole(WindowsBuiltInRole.Administrator);
+        }
+
+        private void NewProfile_Click(object sender, RoutedEventArgs e)
+        {
+            var newProfile = SettingsClient.GetDefaultProfile();
+            newProfile.Name = "(New Profile)";
+            Opts.Profiles.Add(newProfile);
+            Opts.CurrentProfile = Opts.Profiles.FirstOrDefault(x => x.Name == newProfile.Name);
+            Opts.CurrentProfileNotNull = Opts.CurrentProfile != null;
+        }
+
+        private void DeleteProfile_Click(object sender, RoutedEventArgs e)
+        {
+            var result = MessageBox.Show(this, $"Are you sure you want to delete \"{Opts.CurrentProfile.Name}\"?", "Are you sure?", MessageBoxButton.OKCancel, MessageBoxImage.Question, MessageBoxResult.Cancel);
+
+            if (result == MessageBoxResult.OK)
+            {
+                Opts.Profiles.Remove(Opts.CurrentProfile);
+                Opts.CurrentProfile = Opts.Profiles.FirstOrDefault();
+                Opts.CurrentProfileNotNull = Opts.CurrentProfile != null;
+            }
+        }
+
+        private void ViewOnGithubButton_Click(object sender, RoutedEventArgs e)
+        {
+            Process.Start(GithubUrl);
         }
     }
 }

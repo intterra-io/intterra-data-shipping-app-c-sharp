@@ -33,5 +33,9 @@
 			<Name>DSA.Application</Name>
 			<Project>{9321FDD3-C441-49D8-990A-65061A9D60D8}</Project>
 		</ProjectReference>
+		<ProjectReference Include="..\DSA.Console\DSA.Console.csproj">
+			<Name>DSA.Console</Name>
+			<Project>{2558DB05-3AF2-4173-93BA-B2492B8220ED}</Project>
+		</ProjectReference>
 	</ItemGroup>
 </Project>

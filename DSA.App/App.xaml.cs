@@ -20,41 +20,8 @@ namespace DSA.App
         private void Application_Startup(object sender, StartupEventArgs e)
         {
             LogClient.Init();
-
-            if (e.Args.Contains("-s") || e.Args.Contains("--silent"))
-            {
-                try
-                {
-                    var opts = SettingsClient.Get();
-
-                    var profileIx = Array.FindIndex(e.Args, x => x == "-p" || x == "--profile");
-                    if (profileIx == -1 || profileIx + 1 > e.Args.Length - 1)
-                    {
-                        throw new Exception("Profile must be specified");
-                    }
-
-                    var profileName = e.Args[profileIx + 1];
-                    var profile = opts.Profiles[profileName];
-                    if (profileIx == -1 || profileIx + 1 > e.Args.Length - 1)
-                    {
-                        throw new Exception($"Profile not found: {profileName}");
-                    }
-
-                    var batches = new Updater(profile).Run();
-                    LogClient.Log($"Successfully submitted {batches.Count()} batch(es): {string.Join(", ", batches.ToArray())}");
-                }
-                catch (Exception ex)
-                {
-                    LogClient.Log(ex.Message, "ERROR");
-                    Shutdown(1);
-                }
-                Shutdown(0);
-            }
-            else
-            {
-                var window = new MainWindow();
-                window.Show();
-            }
+            var window = new MainWindow();
+            window.Show();
         }
     }
 
