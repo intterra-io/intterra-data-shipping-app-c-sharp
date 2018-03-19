@@ -13,6 +13,7 @@ namespace DSA.Console
             if (args.Contains("-r") || args.Contains("--run"))
             {
                 UpdaterOpts opts = null;
+                UpdaterProfile profile = null;
                 try
                 {
                     opts = SettingsClient.GetSettings();
@@ -32,7 +33,7 @@ namespace DSA.Console
                         throw new Exception($"Malformed Id: {profileIdStr}");
                     }
 
-                    var profile = opts.Profiles.FirstOrDefault(x => x.Id == profileId);
+                    profile = opts.Profiles.FirstOrDefault(x => x.Id == profileId);
                     if (profile == null)
                     {
                         throw new Exception($"Profile not found: {profileId}");
@@ -45,7 +46,7 @@ namespace DSA.Console
                     System.Console.WriteLine(response.ToString());
 
                     // log healthy activity locally
-                    var entry = new LogEntry(response.ToString());
+                    var entry = new LogEntry(response.ToString(), "INFO", profile.ApiKey);
                     LogClient.Log(entry); 
 
                     // heartbeat - lub dub
@@ -62,7 +63,7 @@ namespace DSA.Console
                     // try to log to intterra
                     if (opts != null)
                     {
-                        LogClient.Log(new LogEntry(ex.Message, "ERROR"), opts.RemoteLogging, opts.LogUrl); // log to intterra
+                        LogClient.Log(new LogEntry(ex.Message, "ERROR", profile?.ApiKey), opts.RemoteLogging, opts.LogUrl); // log to intterra
                     }
 
                     System.Console.WriteLine($"ERROR: {ex.Message}");
