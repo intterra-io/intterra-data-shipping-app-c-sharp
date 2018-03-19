@@ -49,7 +49,7 @@ namespace DSA.Console
                     LogClient.Log(entry); 
 
                     // heartbeat - lub dub
-                    if (new DateTime().Minute % 10 == 0)
+                    if (DateTime.Now.Minute % 10 == 0)
                     {
                         entry.Entry.LogMessage = $"Periodic heartbeat: {entry.Entry.LogMessage}";
                         LogClient.Log(entry, opts.RemoteLogging, opts.LogUrl);
