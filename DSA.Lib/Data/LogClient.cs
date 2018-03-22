@@ -33,8 +33,7 @@ namespace DSA.Lib.Data
 
                     foreach (var item in Directory.GetFiles(logDirectory, "*.log", SearchOption.TopDirectoryOnly)
                         .Select(x => new FileInfo(x))
-                        .Where(x => x.CreationTime < (DateTime.Now.AddDays(-14)))
-                        .Skip(14))
+                        .Where(x => x.CreationTime < (DateTime.Now.AddDays(-14))))
                     {
                         try
                         {
