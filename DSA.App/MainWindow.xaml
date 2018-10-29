@@ -99,7 +99,7 @@
                     </GroupBox>
                 </Grid>
             </TabItem>
-            <TabItem Header="Database">
+            <TabItem Header="Data Source">
                 <Grid>
                     <Grid.RowDefinitions>
                         <RowDefinition Height="7*" MinHeight="150" />
@@ -108,7 +108,9 @@
                     </Grid.RowDefinitions>
                     <ScrollViewer VerticalScrollBarVisibility="Auto" Grid.Row="0">
                         <StackPanel>
-                            <Label Content="Data" Style="{StaticResource DarkTitle}"/>
+                            <Label Content="Data Source" Style="{StaticResource DarkTitle}"/>
+                            <Label Content="Type" Style="{StaticResource DarkLabel}"/>
+                            <ComboBox ItemsSource="{Binding Path=DbDrivers}" SelectedValue="{Binding Path=CurrentProfile.Driver}" Style="{StaticResource DarkCombobox}" />
                             <Label Content="Driver" Style="{StaticResource DarkLabel}"/>
                             <ComboBox ItemsSource="{Binding Path=DbDrivers}" SelectedValue="{Binding Path=CurrentProfile.Driver}" Style="{StaticResource DarkCombobox}" />
                             <Label Content="SQL Server Connection" Style="{StaticResource DarkLabel}"/>
@@ -122,7 +124,7 @@
                     </GroupBox>
                 </Grid>
             </TabItem>
-            <TabItem Header="Incidents Query">
+            <TabItem Header="Data Queries">
                 <Grid>
                     <Grid.RowDefinitions>
                         <RowDefinition Height="7*" MinHeight="150" />
@@ -136,10 +138,16 @@
                             <RowDefinition Height="*" />
                             <RowDefinition Height="Auto" />
                         </Grid.RowDefinitions>
-                        <Label Content="Incidents Query" Style="{StaticResource DarkTitle}" Grid.Row="0"/>
-                        <Label Content="Query" Style="{StaticResource DarkLabel}" Grid.Row="1"/>
-                        <TextBox Text="{Binding CurrentProfile.IncidentsQuery, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Style="{StaticResource InputTextBox}"  VerticalScrollBarVisibility="Auto" AcceptsReturn="True" AcceptsTab="True" Grid.Row="2" />
-                        <Button x:Name="TestIncidentsQueryButton" Content="Test Incident Query" Click="TestIncidentsQueryClick" Style="{StaticResource DarkButton}" HorizontalAlignment="Center"  Grid.Row="3" />
+                        <Label Content="Queries" Style="{StaticResource DarkTitle}" Grid.Row="0"/>
+                        <ScrollViewer Grid.Row="1">
+                            <ItemsControl Background="Yellow" ItemTemplate="{StaticResource HasViewItemTemplate}" ItemsSource="{Binding Source={StaticResource MainView}, Path=MyViews}" >
+                                <ItemsControl.ItemsPanel>
+                                    <ItemsPanelTemplate>
+                                        <VirtualizingStackPanel Orientation="Vertical"/>
+                                    </ItemsPanelTemplate>
+                                </ItemsControl.ItemsPanel>
+                            </ItemsControl>
+                        </ScrollViewer>
                     </Grid>
                     <GridSplitter Grid.Row="1" Height="5" HorizontalAlignment="Stretch" />
                     <GroupBox Header="Results" Margin="5" Grid.Row="2">
@@ -147,32 +155,7 @@
                     </GroupBox>
                 </Grid>
             </TabItem>
-            <TabItem Header="Units Query">
-                <Grid>
-                    <Grid.RowDefinitions>
-                        <RowDefinition Height="7*" MinHeight="150" />
-                        <RowDefinition Height="5" />
-                        <RowDefinition Height="3*" MinHeight="150" />
-                    </Grid.RowDefinitions>
-                    <Grid>
-                        <Grid.RowDefinitions>
-                            <RowDefinition Height="Auto" />
-                            <RowDefinition Height="Auto" />
-                            <RowDefinition Height="*" />
-                            <RowDefinition Height="Auto" />
-                        </Grid.RowDefinitions>
-                        <Label Content="Units Query" Style="{StaticResource DarkTitle}" Grid.Row="0" />
-                        <Label Content="Query" Style="{StaticResource DarkLabel}" Grid.Row="1" />
-                        <TextBox Text="{Binding CurrentProfile.UnitsQuery, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Style="{StaticResource InputTextBox}" VerticalScrollBarVisibility="Auto" AcceptsReturn="True" AcceptsTab="True" Grid.Row="2" />
-                        <Button x:Name="TestUnitsQueryButton" Content="Test Units Query" Click="TestUnitsQueryClick" Style="{StaticResource DarkButton}" HorizontalAlignment="Center" Grid.Row="3" />
-                    </Grid>
-                    <GridSplitter Grid.Row="1" Height="5" HorizontalAlignment="Stretch" />
-                    <GroupBox Header="Results" Margin="5" Grid.Row="2">
-                        <TextBox x:Name="TestUnitsQueryResponse" Style="{StaticResource ResultTextBox}" />
-                    </GroupBox>
-                </Grid>
-            </TabItem>
-            <TabItem Header="Run All">
+            <TabItem Header="Run">
                 <Grid>
                     <Grid.RowDefinitions>
                         <RowDefinition Height="7*" MinHeight="150" />
@@ -181,7 +164,7 @@
                     </Grid.RowDefinitions>
                     <ScrollViewer VerticalScrollBarVisibility="Auto" Grid.Row="0">
                         <StackPanel>
-                            <Label Content="Run All" Style="{StaticResource DarkTitle}"/>
+                            <Label Content="Run" Style="{StaticResource DarkTitle}"/>
                             <Button x:Name="RunAllButton" Content="Upload Data" Click="RunAllClick" Style="{StaticResource DarkButton}" HorizontalAlignment="Center" />
                         </StackPanel>
                     </ScrollViewer>
@@ -191,7 +174,7 @@
                     </GroupBox>
                 </Grid>
             </TabItem>
-            <TabItem Header="Task Scheduler">
+            <TabItem Header="Scheduler">
                 <Grid>
                     <Grid.RowDefinitions>
                         <RowDefinition Height="7*" MinHeight="150" />
@@ -200,7 +183,7 @@
                     </Grid.RowDefinitions>
                     <ScrollViewer VerticalScrollBarVisibility="Auto" Grid.Row="0">
                         <StackPanel>
-                            <Label Content="Task Scheduler" Style="{StaticResource DarkTitle}"/>
+                            <Label Content="Scheduler" Style="{StaticResource DarkTitle}"/>
                             <Label Content="Run daily starting at" Style="{StaticResource DarkLabel}"/>
                             <TextBox Text="{Binding CurrentProfile.RunStartTime, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Style="{StaticResource InputTextBox}" />
                             <Label Content="Repeat every (-1 for never)" Style="{StaticResource DarkLabel}"/>
