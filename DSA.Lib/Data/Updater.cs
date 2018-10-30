@@ -22,7 +22,7 @@ namespace DSA.Lib.Data
         public HashHistory History { get; set; }
         public DateTime? LastUpdateOn { get; private set; }
 
-        private HashHistory NewHistory = new HashHistory();
+        private IEnumerable<HashHistory> HashHistories = new List<HashHistory>();
 
         public Updater(UpdaterProfile profile)
         {
@@ -36,14 +36,17 @@ namespace DSA.Lib.Data
             LastUpdateOn = GetLastUpdatedOn();
 
             // Get data
-            var incidents = GetIncidents();
-            var units = GetUnits();
+            // TODO: should be factored into a class method
+            foreach (var query in Profile.Queries)
+            {
+                query.Data = GetSqlData(query);
+            }
 
             // Send data
-            var response = SendData(incidents, units);
+            var response = SendData();
 
             // Save hashes
-            SettingsClient.SaveHashes(Profile.Id, NewHistory);
+            SettingsClient.SaveHashes(Profile.Id, HashHistories);
 
             // Return
             return response;
@@ -71,7 +74,7 @@ namespace DSA.Lib.Data
             }
         }
 
-        private UpdaterResponse SendData(DataTable incidents, DataTable units)
+        private UpdaterResponse SendData()
         {
             // Init hash history
             var incidentHashes = GetHashes(incidents);
@@ -135,14 +138,14 @@ namespace DSA.Lib.Data
             return response;
         }
 
-        private DataTable GetIncidents()
+        private DataTable GetSqlData(Query query)
         {
-            return GetSqlClient().GetData(Profile.GetIncidentsQuery(LastUpdateOn));
+            return GetSqlClient().GetData(UpdaterProfile.GetQuery(query, LastUpdateOn));
         }
 
-        private DataTable GetUnits()
+        private string GetFileData(Query query)
         {
-            return GetSqlClient().GetData(Profile.GetUnitsQuery(LastUpdateOn));
+            throw new NotImplementedException("Must be implemented for Image Trend integration");
         }
 
         private AuthenticationHeaderValue GetAuthHeader()
@@ -185,27 +188,27 @@ namespace DSA.Lib.Data
             return result;
         }
 
-        public async Task<Tuple<string, int>> TestIncidentsQuery()
-        {
-            var result = await Task.Run(() =>
-            {
-                LastUpdateOn = GetLastUpdatedOn();
-                var data = GetIncidents();
-                return new Tuple<string, int>(data.toJson(Formatting.Indented), data.Rows.Count);
-            });
-            return result;
-        }
+        //public async Task<Tuple<string, int>> TestIncidentsQuery()
+        //{
+        //    var result = await Task.Run(() =>
+        //    {
+        //        LastUpdateOn = GetLastUpdatedOn();
+        //        var data = GetIncidents();
+        //        return new Tuple<string, int>(data.toJson(Formatting.Indented), data.Rows.Count);
+        //    });
+        //    return result;
+        //}
 
-        public async Task<Tuple<string, int>> TestUnitsQuery()
-        {
-            var result = await Task.Run(() =>
-            {
-                LastUpdateOn = GetLastUpdatedOn();
-                var data = GetUnits();
-                return new Tuple<string, int>(data.toJson(Formatting.Indented), data.Rows.Count);
-            });
-            return result;
-        }
+        //public async Task<Tuple<string, int>> TestUnitsQuery()
+        //{
+        //    var result = await Task.Run(() =>
+        //    {
+        //        LastUpdateOn = GetLastUpdatedOn();
+        //        var data = GetUnits();
+        //        return new Tuple<string, int>(data.toJson(Formatting.Indented), data.Rows.Count);
+        //    });
+        //    return result;
+        //}
 
         private DateTime? GetLastUpdatedOn()
         {

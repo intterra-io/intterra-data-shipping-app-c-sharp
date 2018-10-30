@@ -8,32 +8,26 @@ namespace DSA.Lib.Models
 {
     public class HashHistory
     {
-        public byte[][] Incidents { get; set; }
+        public string Name { get; set; }
+        public byte[][] HashData { get; set; }
 
-        public byte[][] Units { get; set; }
-
-        public void AppendIcidentHashes(byte[][] hashes)
+        public HashHistory(string name)
         {
-            if (Incidents == null)
-            {
-                Incidents = hashes;
-                return;
-            }
-
-            hashes.CopyTo(Incidents, Incidents.Length - 1);
+            Name = name;
         }
 
-        public void AppendUnitHashes(byte[][] hashes)
+        public void AppendHashes(byte[][] hashes)
         {
-            if (Units == null)
+            if (HashData == null)
             {
-                Units = hashes;
+                HashData = hashes;
                 return;
             }
 
-            hashes.CopyTo(Units, Units.Length - 1);
+            hashes.CopyTo(HashData, HashData.Length - 1);
         }
     }
+
 
     public static class DataExtensions
     {

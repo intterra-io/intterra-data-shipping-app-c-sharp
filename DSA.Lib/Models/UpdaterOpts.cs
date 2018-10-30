@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Data;
 using System.Globalization;
 using System.Linq;
 using System.Text;
@@ -13,6 +14,7 @@ namespace DSA.Lib.Models
         public Guid CurrentProfileId { get; set; }
         public IReadOnlyList<string> DbDrivers { get; } = new List<string>(new[] { "mssql", "odbc" }).AsReadOnly();
         public IReadOnlyList<string> ProfileTypes { get; } = new List<string>(new[] { "analytics", "sitstat" }).AsReadOnly();
+        public IReadOnlyList<string> DataSourceTypes { get; } = new List<string>(new[] { "sql" }).AsReadOnly(); // TODO: add type "file" for Image trend integration
         public ObservableCollection<UpdaterProfile> Profiles { get; } = new ObservableCollection<UpdaterProfile>();
         public string LogUrl { get; set; }
         public bool RemoteLogging { get; set; } = true;
@@ -51,26 +53,22 @@ namespace DSA.Lib.Models
         [JsonIgnore]
         public DateTime RunStartTime { get; set; } = DateTime.Now;
 
+
+        public string DataSourceType { get; set; }
         public string Driver { get; set; }
         public string ConnectionString { get; set; }
         public string ApiKey { get; set; }
         public string ApiKeySecret { get; set; }
         public string Agency { get; set; }
         public bool AllowDuplication { get; set; } = false;
-        public string IncidentsQuery { get; set; }
-        public string UnitsQuery { get; set; }
+        public IEnumerable<Query> Queries { get; set; }
 
-        public string GetIncidentsQuery(DateTime? lastUpdatedOn)
+        public static string GetQuery(Query query, DateTime? lastUpdatedOn)
         {
-            return ReplacePlaceQueryPlaceholders(IncidentsQuery, lastUpdatedOn);
+            return ReplaceQueryPlaceholders(query.CommandText, lastUpdatedOn);
         }
 
-        public string GetUnitsQuery(DateTime? lastUpdatedOn)
-        {
-            return ReplacePlaceQueryPlaceholders(UnitsQuery, lastUpdatedOn);
-        }
-
-        private string ReplacePlaceQueryPlaceholders(string query, DateTime? lastUpdatedOn)
+        private static string ReplaceQueryPlaceholders(string query, DateTime? lastUpdatedOn)
         {
             if (lastUpdatedOn != null)
             {
@@ -82,10 +80,18 @@ namespace DSA.Lib.Models
 
         public bool UsesLastUpdatedDatetime()
         {
-            return (new[] { IncidentsQuery, UnitsQuery})
-                .Where(x => !string.IsNullOrWhiteSpace(x)) // filter out empty queries
-                .Any(x => x.Contains("{{LASTUPDATEDDATETIME}}"));
+            return Queries
+                .Where(x => !string.IsNullOrWhiteSpace(x.CommandText)) // filter out empty queries
+                .Any(x => x.CommandText.Contains("{{LASTUPDATEDDATETIME}}"));
         }
+    }
+
+    public class Query
+    {
+        public string DataName { get; set; }
+        public string CommandText { get; set; }
+        public DataTable Data { get; set; }
+        public byte[][] Hashes { get; set; }
     }
 
     public class UpdaterResponse

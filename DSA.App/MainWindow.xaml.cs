@@ -136,47 +136,47 @@ namespace DSA.App
             }
         }
 
-        private async void TestIncidentsQueryClick(object sender, RoutedEventArgs e)
-        {
-            TestIncidentsQueryResponse.Text = "Working...";
-            TestIncidentsQueryButton.IsEnabled = false;
+        //private async void TestQueryClick(object sender, RoutedEventArgs e)
+        //{
+        //    TestIncidentsQueryResponse.Text = "Working...";
+        //    TestQueryButton.IsEnabled = false;
 
-            try
-            {
-                var updater = new Updater(Opts.CurrentProfile);
-                var response = await updater.TestIncidentsQuery();
-                TestIncidentsQueryResponse.Text = $"Last modified date from API: { (updater.LastUpdateOn != null ? updater.LastUpdateOn.ToString() : "N/A") }\n\nFound {response.Item2} incident records: {response.Item1}";
-            }
-            catch (Exception ex)
-            {
-                TestIncidentsQueryResponse.Text = ex.Message;
-            }
-            finally
-            {
-                TestIncidentsQueryButton.IsEnabled = true;
-            }
-        }
+        //    try
+        //    {
+        //        var updater = new Updater(Opts.CurrentProfile);
+        //        var response = await updater.TestIncidentsQuery();
+        //        TestIncidentsQueryResponse.Text = $"Last modified date from API: { (updater.LastUpdateOn != null ? updater.LastUpdateOn.ToString() : "N/A") }\n\nFound {response.Item2} incident records: {response.Item1}";
+        //    }
+        //    catch (Exception ex)
+        //    {
+        //        TestIncidentsQueryResponse.Text = ex.Message;
+        //    }
+        //    finally
+        //    {
+        //        TestIncidentsQueryButton.IsEnabled = true;
+        //    }
+        //}
 
-        private async void TestUnitsQueryClick(object sender, RoutedEventArgs e)
-        {
-            TestUnitsQueryResponse.Text = "Working...";
-            TestUnitsQueryButton.IsEnabled = false;
+        //private async void TestUnitsQueryClick(object sender, RoutedEventArgs e)
+        //{
+        //    TestUnitsQueryResponse.Text = "Working...";
+        //    TestUnitsQueryButton.IsEnabled = false;
 
-            try
-            {
-                var updater = new Updater(Opts.CurrentProfile);
-                var response = await updater.TestUnitsQuery();
-                TestUnitsQueryResponse.Text = $"Last modified date from API: { (updater.LastUpdateOn != null ? updater.LastUpdateOn.ToString() : "N/A") }\n\nFound {response.Item2} unit records: {response.Item1}";
-            }
-            catch (Exception ex)
-            {
-                TestUnitsQueryResponse.Text = ex.Message;
-            }
-            finally
-            {
-                TestUnitsQueryButton.IsEnabled = true;
-            }
-        }
+        //    try
+        //    {
+        //        var updater = new Updater(Opts.CurrentProfile);
+        //        var response = await updater.TestUnitsQuery();
+        //        TestUnitsQueryResponse.Text = $"Last modified date from API: { (updater.LastUpdateOn != null ? updater.LastUpdateOn.ToString() : "N/A") }\n\nFound {response.Item2} unit records: {response.Item1}";
+        //    }
+        //    catch (Exception ex)
+        //    {
+        //        TestUnitsQueryResponse.Text = ex.Message;
+        //    }
+        //    finally
+        //    {
+        //        TestUnitsQueryButton.IsEnabled = true;
+        //    }
+        //}
 
         private void RunAllClick(object sender, RoutedEventArgs e)
         {
@@ -361,8 +361,7 @@ namespace DSA.App
             // Reset response texboxes
             TestApiConnectivityResponse.Clear();
             TestDataConnectivityResponse.Clear();
-            TestIncidentsQueryResponse.Clear();
-            TestUnitsQueryResponse.Clear();
+            TestQueryResponse.Clear();
             RunAllResponse.Clear();
             CreateTaskResponse.Clear();
 

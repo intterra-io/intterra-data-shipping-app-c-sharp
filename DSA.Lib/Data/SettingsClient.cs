@@ -56,21 +56,21 @@ namespace DSA.Lib.Data
             return opts;
         }
 
-        public static HashHistory GetHashHistory(Guid profileId)
+        public static IEnumerable<HashHistory> GetHashHistory(Guid profileId)
         {
-            HashHistory opts = null;
+            IEnumerable<HashHistory> history = null;
 
             try
             {
-                opts = JsonConvert.DeserializeAnonymousType(File.ReadAllText(GetHistoryFilePath(profileId)), opts);
+                history = JsonConvert.DeserializeAnonymousType(File.ReadAllText(GetHistoryFilePath(profileId)), history);
             }
             catch (Exception)
             {
                 // something went wrong - either this is first time or malformed object
-                opts = new HashHistory();
+                history = new List<HashHistory>();
             }
 
-            return opts;
+            return history;
         }
 
         public static bool HasChanges(UpdaterOpts inMemSettings)
@@ -89,10 +89,10 @@ namespace DSA.Lib.Data
                 Type = "analytics",
                 RunInterval = -1,
                 RunIntervalTimeUnit = "hours",
-                IncidentsQuery = "SELECT * \nFROM dbo.incidents \nWHERE last_updated_rms > '{{LASTUPDATEDDATETIME}}' \nORDER BY incident_datetime;",
-                UnitsQuery = "SELECT * \nFROM dbo.units \nWHERE last_updated_rms > '{{LASTUPDATEDDATETIME}}' \nORDER BY last_updated_rms;",
+                Queries = new List<Query>() { new Query() { CommandText = "", DataName = "" } },
+                DataSourceType = "sql",
                 Driver = "mssql",
-                ConnectionString = "Data Source=my_server;Initial Catalog=my_db;User Id=my_uid; Password=my_password",
+                ConnectionString = "",
                 ApiKey = "",
                 ApiKeySecret = "",
 #if DEBUG
@@ -126,7 +126,7 @@ namespace DSA.Lib.Data
             File.WriteAllText(GetSettingsFilePath(), JsonConvert.SerializeObject(opts, Formatting.Indented));
         }
 
-        public static void SaveHashes(Guid profileId, HashHistory opts)
+        public static void SaveHashes(Guid profileId, IEnumerable<HashHistory> opts)
         {
             // Hit it!
             File.WriteAllText(GetHistoryFilePath(profileId), JsonConvert.SerializeObject(opts, Formatting.None));
