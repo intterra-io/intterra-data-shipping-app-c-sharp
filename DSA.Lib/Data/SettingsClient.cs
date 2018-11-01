@@ -2,6 +2,7 @@
 using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.IO;
 using System.Linq;
 using System.Text;
@@ -89,7 +90,7 @@ namespace DSA.Lib.Data
                 Type = "analytics",
                 RunInterval = -1,
                 RunIntervalTimeUnit = "hours",
-                Queries = new List<Query>() { new Query() { CommandText = "", DataName = "" } },
+                Queries = new ObservableCollection<Query>() { new Query() { CommandText = "", DataName = "" } },
                 DataSourceType = "sql",
                 Driver = "mssql",
                 ConnectionString = "",
@@ -109,12 +110,8 @@ namespace DSA.Lib.Data
 
         public static void Save(this UpdaterOpts opts)
         {
-            // make sure we don't have any duplicate profiles
-            var dups = opts.Profiles.GroupBy(x => x.Id).Where(group => group.Count() > 1);
-            if (dups.Count() > 0)
-            {
-                throw new Exception($"Duplicate profile names: {string.Join(",", dups)}");
-            }
+            // validate config
+            opts.Validate();
 
             // Set current profile name (so we can load it on next startup)
             if (opts.CurrentProfile != null)

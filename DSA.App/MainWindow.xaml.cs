@@ -415,5 +415,35 @@ namespace DSA.App
         {
             Process.Start(GithubUrl);
         }
+
+        private void NewQueryButtonClick(object sender, RoutedEventArgs e)
+        {
+            Opts.CurrentProfile.Queries.Add(new Query() { ProfileType = Opts.CurrentProfile.Type });
+            QueriesTabs.SelectedIndex = Opts.CurrentProfile.Queries.Count - 1;
+        }
+
+        private void QueryDefinition_Remove(object sender, RoutedEventArgs e)
+        {
+            var query = sender as Query;
+            Opts.CurrentProfile.Queries.Remove(query);
+        }
+
+        private async void QueryDefinition_Test(object sender, RoutedEventArgs e)
+        {
+            var query = sender as Query;
+
+            try
+            {
+                var response = await new Updater(Opts.CurrentProfile).TestQuery(query);
+                TestQueryResponse.Text = response.Item1;
+            }
+            catch (Exception ex)
+            {
+                TestQueryResponse.Text = ex.Message;
+            }
+            finally
+            {
+            }
+        }
     }
 }

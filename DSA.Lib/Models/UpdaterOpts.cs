@@ -13,8 +13,8 @@ namespace DSA.Lib.Models
     {
         public Guid CurrentProfileId { get; set; }
         public IReadOnlyList<string> DbDrivers { get; } = new List<string>(new[] { "mssql", "odbc" }).AsReadOnly();
-        public IReadOnlyList<string> ProfileTypes { get; } = new List<string>(new[] { "analytics", "sitstat" }).AsReadOnly();
-        public IReadOnlyList<string> DataSourceTypes { get; } = new List<string>(new[] { "sql" }).AsReadOnly(); // TODO: add type "file" for Image trend integration
+        public IReadOnlyList<string> ProfileTypes { get; } = new List<string>(new[] { "analytics", "sitstat", "custom" }).AsReadOnly();
+        public IReadOnlyList<string> DataSourceTypes { get; } = new List<string>(new[] { "database" }).AsReadOnly(); // TODO: add type "file" for Image trend integration
         public ObservableCollection<UpdaterProfile> Profiles { get; } = new ObservableCollection<UpdaterProfile>();
         public string LogUrl { get; set; }
         public bool RemoteLogging { get; set; } = true;
@@ -35,6 +35,29 @@ namespace DSA.Lib.Models
 #else
                 LogUrl = "https://portal.intterragroup.com/api/logs/create";
 #endif
+            }
+        }
+
+        public void Validate()
+        {
+            // make sure we don't have any duplicate profiles
+            var dups = Profiles.GroupBy(x => x.Id).Where(group => group.Count() > 1);
+            if (dups.Count() > 0)
+            {
+                throw new Exception($"Duplicate profile names: {string.Join(",", dups)}");
+            }
+
+            // make sure we don't have any duplicate query definitions within profiles
+            foreach (var profile in Profiles)
+            {
+                foreach (var query in profile.Queries)
+                {
+                    var count = profile.Queries.Count(x => x.DataName == query.DataName);
+                    if (count > 1)
+                    {
+                        throw new Exception($"Profile \"{profile.Name}\" invalid due to duplicate queries named \"{query.DataName}\"");
+                    }
+                }
             }
         }
     }
@@ -61,7 +84,7 @@ namespace DSA.Lib.Models
         public string ApiKeySecret { get; set; }
         public string Agency { get; set; }
         public bool AllowDuplication { get; set; } = false;
-        public IEnumerable<Query> Queries { get; set; }
+        public ObservableCollection<Query> Queries { get; set; } = new ObservableCollection<Query>();
 
         public static string GetQuery(Query query, DateTime? lastUpdatedOn)
         {
@@ -88,23 +111,36 @@ namespace DSA.Lib.Models
 
     public class Query
     {
-        public string DataName { get; set; }
-        public string CommandText { get; set; }
+        public string ProfileType { get; set;}
+        public string DataName { get; set; } = "(new query)";
+        public string CommandText { get; set; } = "";
         public DataTable Data { get; set; }
         public byte[][] Hashes { get; set; }
     }
 
     public class UpdaterResponse
     {
-        public int SentIncidents { get; set; }
-        public int IgnoredIncidents { get; set; }
-        public int SentUnits { get; set; }
-        public int IgnoredUnits { get; set; }
+        public IEnumerable<SingleResponse> Results { get; set; }
         public Guid TransactionId { get; set; }
 
         public override string ToString()
         {
-            return $"Batch uuid: {(TransactionId != Guid.Empty ? TransactionId.ToString() : "N/A")}\n\nSent Incidents: {SentIncidents}\nIgnored Incidents: {IgnoredIncidents}\nSent Units: {SentUnits}\nIgnored Units: {IgnoredUnits}";
+            var sb = new StringBuilder($"Batch uuid: {(TransactionId != Guid.Empty ? TransactionId.ToString() : "N/A")}\n\n");
+
+            foreach (var item in Results)
+            {
+                sb.Append($"{item.Name}: Sent {item.SentCount} records\n");
+                sb.Append($"{item.Name}: Ignored {item.IgnoredCount} records\n\n");
+            }
+
+            return sb.ToString();
         }
+    }
+
+    public class SingleResponse
+    {
+        public string Name { get; set; }
+        public int SentCount { get; set; }
+        public int IgnoredCount { get; set; }
     }
 }

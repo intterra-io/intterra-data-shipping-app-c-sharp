@@ -5,6 +5,7 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:DSA.App"
+        xmlns:uc="clr-namespace:DSA.App.UserControls"
         mc:Ignorable="d"
         Title="Intterra Data Shipping App" Height="600" Width="800" Background="White" >
     <Grid>
@@ -15,7 +16,7 @@
                         <RowDefinition Height="Auto"/>
                         <RowDefinition Height="*"/>
                     </Grid.RowDefinitions>
-                    <Label Content="Profile" Style="{StaticResource DarkTitle}" Grid.Row="0" />
+                    <Label Content="Profile" Style="{StaticResource StandardTitle}" Grid.Row="0" />
                     <Grid Grid.Row="1" Margin="10 0 0 10">
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="200"/>
@@ -39,38 +40,25 @@
                         </Grid>
                         <ScrollViewer VerticalScrollBarVisibility="Auto" DockPanel.Dock="Right" Grid.Column="1">
                             <StackPanel>
-                                <Label Content="Name" Style="{StaticResource DarkLabel}"/>
+                                <Label Content="Name" Style="{StaticResource StandardLabel}"/>
                                 <TextBox IsEnabled="{Binding CurrentProfileNotNull}" Text="{Binding CurrentProfile.Name, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Style="{StaticResource InputTextBox}" />
-                                <Label Content="Type" Style="{StaticResource DarkLabel}"/>
-                                <ComboBox ItemsSource="{Binding Path=ProfileTypes}" SelectedValue="{Binding CurrentProfile.Type}" Style="{StaticResource DarkCombobox}" />
-                                <Label Content="Agency (optional)" Style="{StaticResource DarkLabel}"/>
+                                <Label Content="Type" Style="{StaticResource StandardLabel}"/>
+                                <ComboBox ItemsSource="{Binding Path=ProfileTypes}" SelectedValue="{Binding CurrentProfile.Type}" Style="{StaticResource StandardCombobox}" />
+                                <Label Content="Agency (optional)" Style="{StaticResource StandardLabel}"/>
                                 <TextBox Text="{Binding CurrentProfile.Agency, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Style="{StaticResource InputTextBox}" />
                                 <GroupBox Header="Options" Margin="10 10 10 10">
                                     <WrapPanel>
                                         <StackPanel Orientation="Horizontal">
                                             <CheckBox IsChecked="{Binding RemoteLogging, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" VerticalAlignment="Center" />
-                                            <Label Content="Share runtime logs with Intterra" Style="{StaticResource DarkLabel}"/>
+                                            <Label Content="Share runtime logs with Intterra" Style="{StaticResource StandardLabel}"/>
                                         </StackPanel>
                                         <StackPanel Orientation="Horizontal">
                                             <CheckBox IsChecked="{Binding AllowDuplication, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" VerticalAlignment="Center" />
-                                            <Label Content="Allow sending of duplicate data" Style="{StaticResource DarkLabel}"/>
+                                            <Label Content="Allow sending of duplicate data" Style="{StaticResource StandardLabel}"/>
                                         </StackPanel>
                                     </WrapPanel>
                                 </GroupBox>
-                                <Button x:Name="DeleteProfile" Content="Delete Profile" Width="100" Background="White" Foreground="#C2322E" Margin="10 10 10 0" Click="DeleteProfile_Click" >
-                                    <Button.Template>
-                                        <ControlTemplate TargetType="{x:Type Button}">
-                                            <Border x:Name="bdr_main" Margin="4" BorderThickness="1" BorderBrush="Transparent" Background="Transparent">
-                                                <ContentPresenter VerticalAlignment="Center" HorizontalAlignment="Center" Margin="8,6,8,6" ContentSource="Content" />
-                                            </Border>
-                                            <ControlTemplate.Triggers>
-                                                <Trigger Property="IsMouseOver" Value="True">
-                                                    <Setter TargetName="bdr_main" Property="BorderBrush" Value="#C2322E"/>
-                                                </Trigger>
-                                            </ControlTemplate.Triggers>
-                                        </ControlTemplate>
-                                    </Button.Template>
-                                </Button>
+                                <Button x:Name="DeleteProfile" Content="Delete Profile" Margin="10 10 10 0" Click="DeleteProfile_Click" Style="{StaticResource DangerLink}" ></Button>
                             </StackPanel>
                         </ScrollViewer>
                     </Grid>
@@ -85,12 +73,12 @@
                     </Grid.RowDefinitions>
                     <ScrollViewer VerticalScrollBarVisibility="Auto" Grid.Row="0">
                         <StackPanel>
-                            <Label Content="Authentication" Style="{StaticResource DarkTitle}" />
-                            <Label Content="Api Key" Style="{StaticResource DarkLabel}" />
+                            <Label Content="Authentication" Style="{StaticResource StandardTitle}" />
+                            <Label Content="Api Key" Style="{StaticResource StandardLabel}" />
                             <TextBox Text="{Binding CurrentProfile.ApiKey, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Style="{StaticResource InputTextBox}" />
-                            <Label Content="Api Key Secret" Style="{StaticResource DarkLabel}"/>
+                            <Label Content="Api Key Secret" Style="{StaticResource StandardLabel}"/>
                             <TextBox Text="{Binding CurrentProfile.ApiKeySecret, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Style="{StaticResource InputTextBox}" />
-                            <Button x:Name="TestApiConnectivityButton" Content="Test API Connectivity" Style="{StaticResource DarkButton}" HorizontalAlignment="Center" Click="TestApiConnectivityClick" />
+                            <Button x:Name="TestApiConnectivityButton" Content="Test API Connectivity" Style="{StaticResource StandardButton}" HorizontalAlignment="Center" Click="TestApiConnectivityClick" />
                         </StackPanel>
                     </ScrollViewer>
                     <GridSplitter Grid.Row="1" Height="5" HorizontalAlignment="Stretch" />
@@ -108,14 +96,14 @@
                     </Grid.RowDefinitions>
                     <ScrollViewer VerticalScrollBarVisibility="Auto" Grid.Row="0">
                         <StackPanel>
-                            <Label Content="Data Source" Style="{StaticResource DarkTitle}"/>
-                            <Label Content="Type" Style="{StaticResource DarkLabel}"/>
-                            <ComboBox ItemsSource="{Binding Path=DataSourceTypes}" SelectedValue="{Binding Path=CurrentProfile.DataSourceType}" Style="{StaticResource DarkCombobox}" />
-                            <Label Content="Driver" Style="{StaticResource DarkLabel}"/>
-                            <ComboBox ItemsSource="{Binding Path=DbDrivers}" SelectedValue="{Binding Path=CurrentProfile.Driver}" Style="{StaticResource DarkCombobox}" />
-                            <Label Content="SQL Server Connection" Style="{StaticResource DarkLabel}"/>
+                            <Label Content="Data Source" Style="{StaticResource StandardTitle}"/>
+                            <Label Content="Type" Style="{StaticResource StandardLabel}"/>
+                            <ComboBox ItemsSource="{Binding Path=DataSourceTypes}" SelectedValue="{Binding Path=CurrentProfile.DataSourceType}" Style="{StaticResource StandardCombobox}" />
+                            <Label Content="Driver" Style="{StaticResource StandardLabel}"/>
+                            <ComboBox ItemsSource="{Binding Path=DbDrivers}" SelectedValue="{Binding Path=CurrentProfile.Driver}" Style="{StaticResource StandardCombobox}" />
+                            <Label Content="SQL Server Connection" Style="{StaticResource StandardLabel}"/>
                             <TextBox Text="{Binding CurrentProfile.ConnectionString, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Style="{StaticResource InputTextBox}" />
-                            <Button x:Name="TestDataConnectivityButton" Content="Test Data Connectivity" Click="TestDataConnectivityClick" Style="{StaticResource DarkButton}" HorizontalAlignment="Center" />
+                            <Button x:Name="TestDataConnectivityButton" Content="Test Data Connectivity" Click="TestDataConnectivityClick" Style="{StaticResource StandardButton}" HorizontalAlignment="Center" />
                         </StackPanel>
                     </ScrollViewer>
                     <GridSplitter Grid.Row="1" Height="5" HorizontalAlignment="Stretch" />
@@ -134,30 +122,27 @@
                     <Grid Grid.Row="0">
                         <Grid.RowDefinitions>
                             <RowDefinition Height="Auto" />
-                            <RowDefinition Height="Auto" />
                             <RowDefinition Height="*" />
-                            <RowDefinition Height="Auto" />
                         </Grid.RowDefinitions>
-                        <Label Content="Queries" Style="{StaticResource DarkTitle}" Grid.Row="0"/>
-                        <ScrollViewer Grid.Row="1">
-                            <ItemsControl Background="Yellow" ItemsSource="{Binding Path=CurrentProfile.Queries}" >
-                                <ItemsControl.ItemTemplate>
-                                    <DataTemplate>
-                                        <StackPanel>
-                                            <Label Content="Data Type" Style="{StaticResource DarkLabel}" />
-                                            <TextBox Text="{Binding DataName, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"  Style="{StaticResource InputTextBox}" />
-                                            <Label Content="Query" Style="{StaticResource DarkLabel}" />
-                                            <TextBox Text="{Binding CommandText, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Style="{StaticResource InputTextBox}" VerticalScrollBarVisibility="Auto" AcceptsReturn="True" AcceptsTab="True" />
-                                            <Grid >
-                                                <!--<Button x:Name="RemoveButton" Content="Remove" Click="TestIncidentsQueryClick" Style="{StaticResource DarkButton}" HorizontalAlignment="Left" />-->
-                                                <Label HorizontalAlignment="Stretch"></Label>
-                                                <!--<Button x:Name="TestButton" Content="Test" Click="TestIncidentsQueryClick" Style="{StaticResource DarkButton}" HorizontalAlignment="Right" />-->
-                                            </Grid>
-                                        </StackPanel>
-                                    </DataTemplate>
-                                </ItemsControl.ItemTemplate>
-                            </ItemsControl>
-                        </ScrollViewer>
+                        <Grid Grid.Row="0">
+                            <Label Content="Queries" Style="{StaticResource StandardTitle}" HorizontalAlignment="Left" />
+                            <Button x:Name="NewQueryButton" Click="NewQueryButtonClick" HorizontalAlignment="Right" Style="{StaticResource Link}" Margin="10">New</Button>
+                        </Grid>
+
+                        <TabControl x:Name="QueriesTabs" Background="White" Grid.Row="1" BorderThickness="0 1 0 0" ItemsSource="{Binding Path=CurrentProfile.Queries, Mode=TwoWay}">
+                            <TabControl.ItemTemplate>
+                                <DataTemplate>
+                                    <TextBlock Text="{Binding DataName}" />
+                                </DataTemplate>
+                            </TabControl.ItemTemplate>
+                            <TabControl.ContentTemplate>
+                                <DataTemplate>
+                                    <ScrollViewer VerticalScrollBarVisibility="Auto">
+                                        <uc:QueryDefinition Remove="QueryDefinition_Remove" Test="QueryDefinition_Test"></uc:QueryDefinition>
+                                    </ScrollViewer>
+                                </DataTemplate>
+                            </TabControl.ContentTemplate>
+                        </TabControl>
                     </Grid>
                     <GridSplitter Grid.Row="1" Height="5" HorizontalAlignment="Stretch" />
                     <GroupBox Header="Results" Margin="5" Grid.Row="2">
@@ -174,8 +159,8 @@
                     </Grid.RowDefinitions>
                     <ScrollViewer VerticalScrollBarVisibility="Auto" Grid.Row="0">
                         <StackPanel>
-                            <Label Content="Run" Style="{StaticResource DarkTitle}"/>
-                            <Button x:Name="RunAllButton" Content="Upload Data" Click="RunAllClick" Style="{StaticResource DarkButton}" HorizontalAlignment="Center" />
+                            <Label Content="Run" Style="{StaticResource StandardTitle}"/>
+                            <Button x:Name="RunAllButton" Content="Upload Data" Click="RunAllClick" Style="{StaticResource StandardButton}" HorizontalAlignment="Center" />
                         </StackPanel>
                     </ScrollViewer>
                     <GridSplitter Grid.Row="1" Height="5" HorizontalAlignment="Stretch" />
@@ -193,17 +178,17 @@
                     </Grid.RowDefinitions>
                     <ScrollViewer VerticalScrollBarVisibility="Auto" Grid.Row="0">
                         <StackPanel>
-                            <Label Content="Scheduler" Style="{StaticResource DarkTitle}"/>
-                            <Label Content="Run daily starting at" Style="{StaticResource DarkLabel}"/>
+                            <Label Content="Scheduler" Style="{StaticResource StandardTitle}"/>
+                            <Label Content="Run daily starting at" Style="{StaticResource StandardLabel}"/>
                             <TextBox Text="{Binding CurrentProfile.RunStartTime, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Style="{StaticResource InputTextBox}" />
-                            <Label Content="Repeat every (-1 for never)" Style="{StaticResource DarkLabel}"/>
+                            <Label Content="Repeat every (-1 for never)" Style="{StaticResource StandardLabel}"/>
                             <TextBox Text="{Binding CurrentProfile.RunInterval, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Style="{StaticResource InputTextBox}" />
-                            <ComboBox SelectedValue="{Binding Path=CurrentProfile.RunIntervalTimeUnit}" SelectedValuePath="Name" Style="{StaticResource DarkCombobox}">
+                            <ComboBox SelectedValue="{Binding Path=CurrentProfile.RunIntervalTimeUnit}" SelectedValuePath="Name" Style="{StaticResource StandardCombobox}">
                                 <ComboBoxItem Name="seconds">Second(s)</ComboBoxItem>
                                 <ComboBoxItem Name="minutes">Minute(s)</ComboBoxItem>
                                 <ComboBoxItem Name="hours">Hour(s)</ComboBoxItem>
                             </ComboBox>
-                            <Button x:Name="CreateTaskButton" Content="Schedule Task" Click="CreateTaskClick" Style="{StaticResource DarkButton}" HorizontalAlignment="Center" />
+                            <Button x:Name="CreateTaskButton" Content="Schedule Task" Click="CreateTaskClick" Style="{StaticResource StandardButton}" HorizontalAlignment="Center" />
                         </StackPanel>
                     </ScrollViewer>
                     <GridSplitter Grid.Row="1" Height="5" HorizontalAlignment="Stretch" />
@@ -215,12 +200,12 @@
         </TabControl>
         <Border BorderBrush="LightGray" BorderThickness="0 1 0 0" VerticalAlignment="Bottom"  >
             <DockPanel VerticalAlignment="Bottom">
-                <Button Content="Back" DockPanel.Dock="Left" HorizontalAlignment="Left" Style="{StaticResource DarkButton}" Click="BackButtonClick"  />
-                <Button Content="Next" DockPanel.Dock="Right" HorizontalAlignment="Right" Style="{StaticResource DarkButton}" Click="NextButtonClick"  />
-                <Button Content="Save" DockPanel.Dock="Right" HorizontalAlignment="Right" Style="{StaticResource DarkButton}" Click="SaveButtonClick"  />
+                <Button Content="Back" DockPanel.Dock="Left" HorizontalAlignment="Left" Style="{StaticResource StandardButton}" Click="BackButtonClick"  />
+                <Button Content="Next" DockPanel.Dock="Right" HorizontalAlignment="Right" Style="{StaticResource StandardButton}" Click="NextButtonClick"  />
+                <Button Content="Save" DockPanel.Dock="Right" HorizontalAlignment="Right" Style="{StaticResource StandardButton}" Click="SaveButtonClick"  />
                 <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
-                    <Label x:Name="SaveOnLabelPrefix" Visibility="Hidden" Content="Last Saved: " DockPanel.Dock="Right"  Style="{StaticResource DarkLabel}" VerticalContentAlignment="Center" HorizontalAlignment="Right" />
-                    <Label x:Name="SavedOnLabel" DockPanel.Dock="Right" HorizontalAlignment="Right" Style="{StaticResource DarkLabel}" VerticalContentAlignment="Center" />
+                    <Label x:Name="SaveOnLabelPrefix" Visibility="Hidden" Content="Last Saved: " DockPanel.Dock="Right"  Style="{StaticResource StandardLabel}" VerticalContentAlignment="Center" HorizontalAlignment="Right" />
+                    <Label x:Name="SavedOnLabel" DockPanel.Dock="Right" HorizontalAlignment="Right" Style="{StaticResource StandardLabel}" VerticalContentAlignment="Center" />
                 </StackPanel>
             </DockPanel>
         </Border>

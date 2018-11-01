@@ -19,15 +19,13 @@ namespace DSA.Lib.Data
     public class Updater
     {
         public UpdaterProfile Profile { get; set; }
-        public HashHistory History { get; set; }
+        public IEnumerable<HashHistory> HashHistories { get; set; }
         public DateTime? LastUpdateOn { get; private set; }
-
-        private IEnumerable<HashHistory> HashHistories = new List<HashHistory>();
 
         public Updater(UpdaterProfile profile)
         {
             Profile = profile;
-            History = SettingsClient.GetHashHistory(Profile.Id);
+            HashHistories = SettingsClient.GetHashHistory(Profile.Id);
         }
 
         public UpdaterResponse Run()
@@ -77,36 +75,38 @@ namespace DSA.Lib.Data
         private UpdaterResponse SendData()
         {
             // Init hash history
-            var incidentHashes = GetHashes(incidents);
-            var unitHashes = GetHashes(units);
-            NewHistory.AppendIcidentHashes(incidentHashes);
-            NewHistory.AppendUnitHashes(unitHashes);
+            foreach (var query in Profile.Queries)
+            {
+                query.Hashes = GetHashes(query.Data);
+            }
 
             // Strip duplicate data based on hash history
             if (!Profile.AllowDuplication)
             {
-                RemoveDuplicates(incidents, incidentHashes, History.Incidents);
-                RemoveDuplicates(units, unitHashes, History.Units);
+                foreach (var x in Profile.Queries)
+                {
+                    var history = HashHistories.FirstOrDefault(y => y.Name == x.DataName);
+                    RemoveDuplicates(x.Data, x.Hashes, history?.HashData);
+                }
             }
 
             // Build response object 
             var response = new UpdaterResponse() {
-                SentIncidents = incidents.Rows.Count,
-                IgnoredIncidents = incidentHashes.Count() - incidents.Rows.Count,
-                SentUnits = units.Rows.Count,
-                IgnoredUnits = unitHashes.Count() - units.Rows.Count
+                Results = Profile.Queries.Select(x => new SingleResponse() {
+                    Name = x.DataName,
+                    SentCount = x.Data.Rows.Count,
+                    IgnoredCount = x.Hashes.Count() - x.Data.Rows.Count
+                })
             };
 
             // Return if there is no data to send
-            if (incidents.Rows.Count == 0 && units.Rows.Count == 0)
-            {
+            var rowsToSend = 0;
+            foreach (var x in Profile.Queries)
+                rowsToSend += x.Data.Rows.Count;
+            if (rowsToSend == 0)
                 return response;
-            }
 
             // Send data
-            var incidentsBytes = Encoding.UTF8.GetBytes(incidents.toCsv());
-            var unitsBytes = Encoding.UTF8.GetBytes(units.toCsv());
-
             MultipartFormDataContent form = new MultipartFormDataContent();
 
             form.Add(new StringContent(Profile.Type), "\"type\"");
@@ -114,8 +114,11 @@ namespace DSA.Lib.Data
             if (!string.IsNullOrWhiteSpace(Profile.Agency))
                 form.Add(new StringContent(Profile.Agency), "\"agency\""); // Add agency if populated
 
-            form.Add(new ByteArrayContent(incidentsBytes, 0, incidentsBytes.Length), "\"incidents\"", "incidents.csv");
-            form.Add(new ByteArrayContent(unitsBytes, 0, unitsBytes.Length), "\"units\"", "units.csv");
+            foreach (var x in Profile.Queries)
+            {
+                var bytes = Encoding.UTF8.GetBytes(x.Data.toCsv());
+                form.Add(new ByteArrayContent(bytes, 0, bytes.Length), $"\"{(Profile.Type == "custom" ? "custom_" : "")}{x.DataName}\"", $"{x.DataName}.csv");
+            }
 
             var httpResponse = Http.Post(Profile.DataUrl, form, GetAuthHeader());
             var readContentTask = httpResponse.Content.ReadAsStringAsync();
@@ -188,27 +191,16 @@ namespace DSA.Lib.Data
             return result;
         }
 
-        //public async Task<Tuple<string, int>> TestIncidentsQuery()
-        //{
-        //    var result = await Task.Run(() =>
-        //    {
-        //        LastUpdateOn = GetLastUpdatedOn();
-        //        var data = GetIncidents();
-        //        return new Tuple<string, int>(data.toJson(Formatting.Indented), data.Rows.Count);
-        //    });
-        //    return result;
-        //}
-
-        //public async Task<Tuple<string, int>> TestUnitsQuery()
-        //{
-        //    var result = await Task.Run(() =>
-        //    {
-        //        LastUpdateOn = GetLastUpdatedOn();
-        //        var data = GetUnits();
-        //        return new Tuple<string, int>(data.toJson(Formatting.Indented), data.Rows.Count);
-        //    });
-        //    return result;
-        //}
+        public async Task<Tuple<string, int>> TestQuery(Query query)
+        {
+            var result = await Task.Run(() =>
+            {
+                LastUpdateOn = GetLastUpdatedOn();
+                var data = GetSqlData(query);
+                return new Tuple<string, int>(data.toJson(Formatting.Indented), data.Rows.Count);
+            });
+            return result;
+        }
 
         private DateTime? GetLastUpdatedOn()
         {

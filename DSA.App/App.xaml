@@ -4,18 +4,10 @@
              xmlns:local="clr-namespace:DSA.App"
              Startup="Application_Startup">
     <Application.Resources>
-        <Style x:Key="DarkButton" TargetType="Button">
+        <Style x:Key="StandardButton" TargetType="Button">
             <Setter Property="FontSize" Value="16" />
             <Setter Property="Padding" Value="10" />
             <Setter Property="Margin" Value="10" />
-            <!--<Setter Property="Background" Value="#333" />-->
-            <!--<Setter Property="Foreground" Value="LightGray" />-->
-            <!--<Style.Triggers>
-                <Trigger Property="IsMouseOver" Value="true">
-                    <Setter Property="Foreground" Value="Gray" />
-                    <Setter Property="Background" Value="#444" />
-                </Trigger>
-            </Style.Triggers>-->
         </Style>
         <Style x:Key="SegmentButton" TargetType="Button">
             <Setter Property="FontSize" Value="16" />
@@ -23,14 +15,7 @@
             <Setter Property="Margin" Value="10" />
             <Setter Property="Height" Value="125" />
             <Setter Property="Width" Value="125" />
-            <!--<Setter Property="Background" Value="#333" />-->
             <Setter Property="Foreground" Value="DarkGray" />
-            <!--<Style.Triggers>
-                <Trigger Property="IsMouseOver" Value="true">
-                    <Setter Property="Foreground" Value="Gray" />
-                    <Setter Property="Background" Value="#444" />
-                </Trigger>
-            </Style.Triggers>-->
         </Style>
         <Style x:Key="SegmentButtonSelected" TargetType="Button">
             <Setter Property="FontSize" Value="16" />
@@ -40,52 +25,43 @@
             <Setter Property="Width" Value="125" />
             <Setter Property="Background" Value="#3B9AF0" />
             <Setter Property="Foreground" Value="#fff" />
-            <!--<Style.Triggers>
-                <Trigger Property="IsMouseOver" Value="true">
-                    <Setter Property="Foreground" Value="Gray" />
-                    <Setter Property="Background" Value="#444" />
-                </Trigger>
-            </Style.Triggers>-->
         </Style>
         <Style x:Key="ResultTextBox" TargetType="TextBox">
             <Setter Property="TextWrapping" Value="Wrap" />
             <Setter Property="FontFamily" Value="Courier New" />
-            <!--<Setter Property="Foreground" Value="LightGray" />-->
-            <!--<Setter Property="Background" Value="#333" />-->
             <Setter Property="Height" Value="Auto" />
             <Setter Property="Margin" Value="0" />
             <Setter Property="Padding" Value="3" />
-            <!--<Setter Property="BorderBrush" Value="Gray" />-->
             <Setter Property="VerticalScrollBarVisibility" Value="Auto" />
             <Setter Property="IsReadOnly" Value="True" />
             <Setter Property="BorderThickness" Value="0" />
         </Style>
         <Style x:Key="InputTextBox" TargetType="TextBox">
             <Setter Property="TextWrapping" Value="NoWrap" />
-            <!--<Setter Property="Foreground" Value="LightGray" />-->
-            <!--<Setter Property="Background" Value="#0F0F0F" />-->
-            <!--<Setter Property="BorderBrush" Value="Gray" />-->
             <Setter Property="Margin" Value="10 0" />
             <Setter Property="Padding" Value="3" />
         </Style>
-        <Style x:Key="DarkCombobox" TargetType="ComboBox">
-            <!--<Setter Property="Foreground" Value="LightGray" />-->
-            <!--<Setter Property="Background" Value="#0F0F0F" />-->
-            <!--<Setter Property="BorderBrush" Value="Gray" />-->
+        <Style x:Key="QueryTextBox" TargetType="TextBox">
+            <Setter Property="TextWrapping" Value="NoWrap" />
+            <Setter Property="Margin" Value="10 0" />
+            <Setter Property="Padding" Value="3" />
+            <Setter Property="VerticalScrollBarVisibility" Value="Auto" />
+            <Setter Property="AcceptsReturn" Value="True" />
+            <Setter Property="AcceptsTab" Value="True" />
+            <Setter Property="Height" Value="100" />
+        </Style>
+        <Style x:Key="StandardCombobox" TargetType="ComboBox">
             <Setter Property="Margin" Value="10 0" />
         </Style>
-        <Style x:Key="DarkLabel" TargetType="Label">
-            <!--<Setter Property="Foreground" Value="Gray" />-->
+        <Style x:Key="StandardLabel" TargetType="Label">
             <Setter Property="Margin" Value="10 0" />
         </Style>
         <Style x:Key="CodeLabel" TargetType="Label">
-            <!--<Setter Property="Foreground" Value="Gray" />-->
             <Setter Property="Margin" Value="10 0" />
             <Setter Property="FontFamily" Value="Courier New" />
             <Setter Property="Width" Value="75" />
         </Style>
-        <Style x:Key="DarkTitle" TargetType="Label">
-            <!--<Setter Property="Foreground" Value="Gray" />-->
+        <Style x:Key="StandardTitle" TargetType="Label">
             <Setter Property="FontSize" Value="24" />
         </Style>
         <Style x:Key="Link" TargetType="Button">
@@ -103,6 +79,27 @@
                         <ControlTemplate.Triggers>
                             <Trigger Property="IsPressed" Value="True">
                                 <Setter Property="Foreground" Value="Red"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+        <Style x:Key="DangerLink" TargetType="Button">
+            <Setter Property="VerticalAlignment" Value="Center"/>
+            <Setter Property="HorizontalAlignment" Value="Center"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="Foreground" Value="#C2322E"/>
+            <Setter Property="Background" Value="White"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="{x:Type Button}">
+                        <Border x:Name="bdr_main" Margin="4" BorderThickness="1" BorderBrush="Transparent" Background="Transparent">
+                            <ContentPresenter VerticalAlignment="Center" HorizontalAlignment="Center" Margin="8,6,8,6" ContentSource="Content" />
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="bdr_main" Property="BorderBrush" Value="#C2322E"/>
                             </Trigger>
                         </ControlTemplate.Triggers>
                     </ControlTemplate>
