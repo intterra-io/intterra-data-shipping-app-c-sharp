@@ -12,6 +12,7 @@ namespace DSA.Lib.Models
     public class UpdaterOpts
     {
         public Guid CurrentProfileId { get; set; }
+        public string AppVersion { get; set; }
         public IReadOnlyList<string> DbDrivers { get; } = new List<string>(new[] { "mssql", "odbc" }).AsReadOnly();
         public IReadOnlyList<string> ProfileTypes { get; } = new List<string>(new[] { "analytics", "sitstat", "custom" }).AsReadOnly();
         public IReadOnlyList<string> DataSourceTypes { get; } = new List<string>(new[] { "database" }).AsReadOnly(); // TODO: add type "file" for Image trend integration
@@ -59,6 +60,16 @@ namespace DSA.Lib.Models
                     }
                 }
             }
+
+            // make sure we custom profiles all have paths
+            foreach (var profile in Profiles.Where(x => x.Type == "custom"))
+            {
+                var queriesWithmissingPaths = profile.Queries.Where(x => string.IsNullOrWhiteSpace(x.Path));
+                if (queriesWithmissingPaths.Count() > 0)
+                {
+                    throw new Exception($"Profile \"{profile.Name}\" invalid due to missing path definitions in the following queries: {string.Join(", " , queriesWithmissingPaths.Select(x => $"\"{x.DataName}\""))}");
+                }
+            }
         }
     }
 
@@ -85,6 +96,10 @@ namespace DSA.Lib.Models
         public string Agency { get; set; }
         public bool AllowDuplication { get; set; } = false;
         public ObservableCollection<Query> Queries { get; set; } = new ObservableCollection<Query>();
+        [Obsolete("This property is now stored in the 'Queries' data structure")]
+        public string IncidentsQuery { get; set; }
+        [Obsolete("This property is now stored in the 'Queries' data structure")]
+        public string UnitsQuery { get; set; }
 
         public static string GetQuery(Query query, DateTime? lastUpdatedOn)
         {
@@ -114,6 +129,7 @@ namespace DSA.Lib.Models
         public string ProfileType { get; set;}
         public string DataName { get; set; } = "(new query)";
         public string CommandText { get; set; } = "";
+        public string Path { get; set; } = "";
         public DataTable Data { get; set; }
         public byte[][] Hashes { get; set; }
     }

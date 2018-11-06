@@ -24,6 +24,7 @@ namespace DSA.App
         const string TaskName = "Intterra Data Shipping App";
         const string TaskDescription = "Reads incident response data from CAD, AVL, and/or RMS data sources as configured and sends to Intterra's secure API";
         const string GithubUrl = "https://github.com/intterra/intterra-data-shipping-app-c-sharp";
+        string AppVersion = Assembly.GetEntryAssembly().GetName().Version.ToString();
 
         public MainWindow()
         {
@@ -44,7 +45,7 @@ namespace DSA.App
             Opts.CurrentProfileNotNull = Opts.CurrentProfile != null;
 
             SetTitle();
-            VersionLabel.Content = Assembly.GetEntryAssembly().GetName().Version;
+            VersionLabel.Content = AppVersion;
             DsaAppWindow.ContentRendered += DsaAppWindow_ContentRendered;
         }
 
@@ -373,6 +374,7 @@ namespace DSA.App
         {
             try
             {
+                Opts.AppVersion = AppVersion;
                 Opts.Save();
                 Opts.SavedOn = DateTime.Now.ToString();
                 SavedOnLabel.Content = Opts.SavedOn;
@@ -443,6 +445,25 @@ namespace DSA.App
             }
             finally
             {
+            }
+        }
+
+        private void ProfileType_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            // When the profile type changes, update queries with this data
+            for (int i = 0; i < Opts.CurrentProfile.Queries.Count; i++)
+            {
+                var query = Opts.CurrentProfile.Queries[i];
+                Opts.CurrentProfile.Queries[i] = new Query()
+                {
+
+                    ProfileType = Opts.CurrentProfile.Type,
+                    DataName = query.DataName,
+                    CommandText = query.CommandText,
+                    Data = query.Data,
+                    Path = query.Path,
+                    Hashes = query.Hashes
+                };
             }
         }
     }

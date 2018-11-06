@@ -12,6 +12,7 @@ using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Security.Cryptography;
 using System.Text;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 
 namespace DSA.Lib.Data
@@ -116,6 +117,20 @@ namespace DSA.Lib.Data
 
             foreach (var x in Profile.Queries)
             {
+
+                // replace placeholder values for (date only for now)
+                var path = $"/{x.DataName}/{x.Path.TrimStart(new char['/'])}";
+                var now = DateTime.UtcNow;
+                var regex = new Regex("{[^}]*}");
+                foreach (var matchObj in regex.Matches(x.Path))
+                {
+                    var match = ((Match)matchObj);
+                    path = path.Replace(match.Value, now.ToString(match.Value.Replace("{", "").Replace("}", "")));
+                }
+
+                // TODO: add path for this query to form
+
+                // convert string to bytes add data to form
                 var bytes = Encoding.UTF8.GetBytes(x.Data.toCsv());
                 form.Add(new ByteArrayContent(bytes, 0, bytes.Length), $"\"{(Profile.Type == "custom" ? "custom_" : "")}{x.DataName}\"", $"{x.DataName}.csv");
             }

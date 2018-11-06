@@ -12,8 +12,8 @@ namespace DSA.Lib.Data
 {
     public static class SettingsClient
     {
-        const string OrgName = "Intterra";
         const string AppName = "DSA";
+        const string OrgName = "Intterra";
         const string SettingsFileName = "settings.json";
         const string HashHistoryFileSuffix = ".hash.json";
 
@@ -43,6 +43,40 @@ namespace DSA.Lib.Data
             try
             {
                 opts = JsonConvert.DeserializeAnonymousType(File.ReadAllText(GetSettingsFilePath()), opts);
+
+                // Migrate from previous versions
+                foreach (var profile in opts.Profiles)
+                {
+#pragma warning disable CS0618 // Type or member is obsolete
+                    if (!string.IsNullOrWhiteSpace(profile.IncidentsQuery))
+                    {
+                        // construct new incidents query object
+                        profile.Queries.Add(new Query()
+                        {
+                            ProfileType = profile.Type,
+                            DataName = "incidents",
+                            CommandText = profile.IncidentsQuery
+                        });
+
+                        // clear previous query
+                        profile.IncidentsQuery = string.Empty;
+                    }
+
+                    if (!string.IsNullOrWhiteSpace(profile.UnitsQuery))
+                    {
+                        // construct new units query object
+                        profile.Queries.Add(new Query()
+                        {
+                            ProfileType = profile.Type,
+                            DataName = "units",
+                            CommandText = profile.UnitsQuery
+                        });
+
+                        // clear previous query
+                        profile.UnitsQuery = string.Empty;
+                    }
+#pragma warning restore CS0618 // Type or member is obsolete
+                }
             }
             catch (Exception)
             {
@@ -90,7 +124,7 @@ namespace DSA.Lib.Data
                 Type = "analytics",
                 RunInterval = -1,
                 RunIntervalTimeUnit = "hours",
-                Queries = new ObservableCollection<Query>() { new Query() { CommandText = "", DataName = "" } },
+                Queries = new ObservableCollection<Query>() { new Query() },
                 DataSourceType = "sql",
                 Driver = "mssql",
                 ConnectionString = "",

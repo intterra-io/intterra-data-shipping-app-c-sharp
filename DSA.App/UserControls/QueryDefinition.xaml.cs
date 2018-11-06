@@ -47,7 +47,12 @@ namespace DSA.App.UserControls
         private void Grid_DataContextChanged(object sender, DependencyPropertyChangedEventArgs e)
         {
             var query = DataContext as Query;
-            if ( query != null && query.ProfileType != "custom")
+            if (query?.ProfileType == "custom")
+            {
+                PathLabel.Visibility = Visibility.Visible;
+                PathInput.Visibility = Visibility.Visible;
+            }
+            else
             {
                 PathLabel.Visibility = Visibility.Collapsed;
                 PathInput.Visibility = Visibility.Collapsed;

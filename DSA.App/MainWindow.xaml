@@ -43,7 +43,7 @@
                                 <Label Content="Name" Style="{StaticResource StandardLabel}"/>
                                 <TextBox IsEnabled="{Binding CurrentProfileNotNull}" Text="{Binding CurrentProfile.Name, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Style="{StaticResource InputTextBox}" />
                                 <Label Content="Type" Style="{StaticResource StandardLabel}"/>
-                                <ComboBox ItemsSource="{Binding Path=ProfileTypes}" SelectedValue="{Binding CurrentProfile.Type}" Style="{StaticResource StandardCombobox}" />
+                                <ComboBox x:Name="ProfileType" ItemsSource="{Binding Path=ProfileTypes}" SelectedValue="{Binding CurrentProfile.Type}" Style="{StaticResource StandardCombobox}" SelectionChanged="ProfileType_SelectionChanged" />
                                 <Label Content="Agency (optional)" Style="{StaticResource StandardLabel}"/>
                                 <TextBox Text="{Binding CurrentProfile.Agency, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Style="{StaticResource InputTextBox}" />
                                 <GroupBox Header="Options" Margin="10 10 10 10">
