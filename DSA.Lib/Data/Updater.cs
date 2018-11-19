@@ -119,7 +119,7 @@ namespace DSA.Lib.Data
             {
 
                 // replace placeholder values for (date only for now)
-                var path = $"/{x.DataName}/{x.Path.TrimStart(new char['/'])}";
+                var path = $"{x.Path.TrimStart(new char['/'])}";
                 var now = DateTime.UtcNow;
                 var regex = new Regex("{[^}]*}");
                 foreach (var matchObj in regex.Matches(x.Path))
@@ -129,10 +129,11 @@ namespace DSA.Lib.Data
                 }
 
                 // TODO: add path for this query to form
+                form.Add(new StringContent(path), "\"pathEnd\"");
 
                 // convert string to bytes add data to form
                 var bytes = Encoding.UTF8.GetBytes(x.Data.toCsv());
-                form.Add(new ByteArrayContent(bytes, 0, bytes.Length), $"\"{(Profile.Type == "custom" ? "custom_" : "")}{x.DataName}\"", $"{x.DataName}.csv");
+                form.Add(new ByteArrayContent(bytes, 0, bytes.Length), $"\"{x.DataName}\"", $"{x.DataName}.csv");
             }
 
             var httpResponse = Http.Post(Profile.DataUrl, form, GetAuthHeader());
