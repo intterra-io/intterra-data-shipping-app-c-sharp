@@ -117,23 +117,21 @@ namespace DSA.Lib.Data
 
             foreach (var x in Profile.Queries)
             {
-
-                // replace placeholder values for (date only for now)
                 var path = $"{x.Path.TrimStart(new char['/'])}";
-                var now = DateTime.UtcNow;
-                var regex = new Regex("{[^}]*}");
-                foreach (var matchObj in regex.Matches(x.Path))
-                {
-                    var match = ((Match)matchObj);
-                    path = path.Replace(match.Value, now.ToString(match.Value.Replace("{", "").Replace("}", "")));
-                }
-
-                // TODO: add path for this query to form
                 if (Profile.Type == "custom" && path != null)
                 {
+                    // replace placeholder values for (date only for now)                                    
+                    var now = DateTime.UtcNow;
+                    var regex = new Regex("{[^}]*}");
+
+                    foreach (var matchObj in regex.Matches(x.Path))
+                    {
+                        var match = ((Match)matchObj);
+                        path = path.Replace(match.Value, now.ToString(match.Value.Replace("{", "").Replace("}", "")));
+                    }
+                    path = $"{x.DataName}/{path}";
                     form.Add(new StringContent(path), "\"pathEnd\"");
                 }
-
                 // convert string to bytes add data to form
                 var bytes = Encoding.UTF8.GetBytes(x.Data.toCsv());                
                 form.Add(new ByteArrayContent(bytes, 0, bytes.Length), $"\"{x.DataName}\"", $"{x.DataName}.csv");                                
