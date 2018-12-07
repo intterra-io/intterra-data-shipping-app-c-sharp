@@ -2622,7 +2622,7 @@
 		<col def="I2">Encoded</col>
 		<col def="S0">Comment</col>
 		<col def="I4">TimeStamp</col>
-		<row><td>COMPANY_NAME</td><td>1033</td><td>Intterra</td><td>0</td><td/><td>-1666885141</td></row>
+		<row><td>COMPANY_NAME</td><td>1033</td><td>Intterra</td><td>0</td><td/><td>1042734439</td></row>
 		<row><td>DN_AlwaysInstall</td><td>1033</td><td>Always Install</td><td>0</td><td/><td>2091238128</td></row>
 		<row><td>IDPROP_EXPRESS_LAUNCH_CONDITION_COLOR</td><td>1033</td><td>The color settings of your system are not adequate for running [ProductName].</td><td>0</td><td/><td>2091238128</td></row>
 		<row><td>IDPROP_EXPRESS_LAUNCH_CONDITION_DOTNETVERSION45FULL</td><td>1033</td><td>Microsoft .NET Framework 4.5 Full package or greater needs to be installed for this installation to continue.</td><td>0</td><td/><td>2091215696</td></row>
@@ -3726,8 +3726,8 @@
 		<row><td>IDS__TargetReq_DESC_RAM</td><td>1033</td><td>The amount of RAM is not adequate for running [ProductName].</td><td>0</td><td/><td>2091238128</td></row>
 		<row><td>IDS__TargetReq_DESC_RESOLUTION</td><td>1033</td><td>The screen resolution is not adequate for running [ProductName].</td><td>0</td><td/><td>2091238128</td></row>
 		<row><td>ID_STRING1</td><td>1033</td><td/><td>0</td><td/><td>2091240176</td></row>
-		<row><td>ID_STRING2</td><td>1033</td><td>http://www.intterragroup.com</td><td>0</td><td/><td>-1591311505</td></row>
-		<row><td>ID_STRING3</td><td>1033</td><td>Intterra</td><td>0</td><td/><td>-1666885141</td></row>
+		<row><td>ID_STRING2</td><td>1033</td><td>http://www.Intterra.com</td><td>0</td><td/><td>1042734439</td></row>
+		<row><td>ID_STRING3</td><td>1033</td><td>Intterra</td><td>0</td><td/><td>1042734439</td></row>
 		<row><td>IIDS_UITEXT_FeatureUninstalled</td><td>1033</td><td>This feature will remain uninstalled.</td><td>0</td><td/><td>2091238128</td></row>
 	</table>
 
@@ -4354,7 +4354,7 @@ UwBpAG4AZwBsAGUASQBtAGEAZwBlAAEARQB4AHAAcgBlAHMAcwA=
 		<row><td>PROGRAMFILETOLAUNCHATEND</td><td>[INSTALLDIR]DSA.Application.Primary output</td><td/></row>
 		<row><td>ProductCode</td><td>{93BCAF47-3909-444A-83D8-7522302881C3}</td><td/></row>
 		<row><td>ProductName</td><td>Data Shipping App</td><td/></row>
-		<row><td>ProductVersion</td><td>3.0.2</td><td/></row>
+		<row><td>ProductVersion</td><td>3.1.0</td><td/></row>
 		<row><td>ProgressType0</td><td>install</td><td/></row>
 		<row><td>ProgressType1</td><td>Installing</td><td/></row>
 		<row><td>ProgressType2</td><td>installed</td><td/></row>
