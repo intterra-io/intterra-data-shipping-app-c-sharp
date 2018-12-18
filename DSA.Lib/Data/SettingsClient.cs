@@ -91,9 +91,9 @@ namespace DSA.Lib.Data
             return opts;
         }
 
-        public static IEnumerable<HashHistory> GetHashHistory(Guid profileId)
+        public static List<HashHistory> GetHashHistory(Guid profileId)
         {
-            IEnumerable<HashHistory> history = null;
+            List<HashHistory> history = null;
 
             try
             {
@@ -131,9 +131,9 @@ namespace DSA.Lib.Data
                 ApiKey = "",
                 ApiKeySecret = "",
 #if DEBUG
-                LastDatetimeUrl = "http://localhost:8000/v1/data/get-last-datetime",
-                DataUrl = "http://localhost:8000/v1/data/add",
-                TestUrl = "http://localhost:8000/v1/keys/test",
+                LastDatetimeUrl = "https://dc-dev.intterragroup.com/v1/data/get-last-datetime",
+                DataUrl = "https://dc-dev.intterragroup.com/v1/data/add",
+                TestUrl = "https://dc-dev.intterragroup.com/v1/keys/test",
 #else
                 LastDatetimeUrl = "https://dc.intterragroup.com/v1/data/get-last-datetime",
                 DataUrl = "https://dc.intterragroup.com/v1/data/add",

@@ -20,7 +20,7 @@ namespace DSA.Lib.Data
     public class Updater
     {
         public UpdaterProfile Profile { get; set; }
-        public IEnumerable<HashHistory> HashHistories { get; set; }
+        public List<HashHistory> HashHistories { get; set; }
         public DateTime? LastUpdateOn { get; private set; }
 
         public Updater(UpdaterProfile profile)
@@ -145,6 +145,21 @@ namespace DSA.Lib.Data
             if (!httpResponse.IsSuccessStatusCode)
             {
                 throw new Exception($"{httpResponse.StatusCode} - {content}");
+            }
+
+            // update hash history
+            foreach (var query in Profile.Queries)
+            {
+                // Find or initialize history object
+                var hashHistory = HashHistories.FirstOrDefault(y => y.Name == query.DataName);
+                if (hashHistory == null)
+                {
+                    hashHistory = new HashHistory(query.DataName);
+                    HashHistories.Add(hashHistory);
+                }
+
+                // Set hashes in history object
+                hashHistory.AppendHashes(query.Hashes);
             }
 
             // Parse response and return
