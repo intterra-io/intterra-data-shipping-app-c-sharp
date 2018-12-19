@@ -53,7 +53,7 @@
                                             <Label Content="Share runtime logs with Intterra" Style="{StaticResource StandardLabel}"/>
                                         </StackPanel>
                                         <StackPanel Orientation="Horizontal">
-                                            <CheckBox IsChecked="{Binding AllowDuplication, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" VerticalAlignment="Center" />
+                                            <CheckBox IsChecked="{Binding CurrentProfile.AllowDuplication, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" VerticalAlignment="Center" />
                                             <Label Content="Allow sending of duplicate data" Style="{StaticResource StandardLabel}"/>
                                         </StackPanel>
                                     </WrapPanel>
