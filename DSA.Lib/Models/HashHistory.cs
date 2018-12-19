@@ -18,13 +18,7 @@ namespace DSA.Lib.Models
 
         public void AppendHashes(byte[][] hashes)
         {
-            if (HashData == null)
-            {
-                HashData = hashes;
-                return;
-            }
-
-            hashes.CopyTo(HashData, HashData.Length - 1);
+            HashData = hashes;
         }
     }
 

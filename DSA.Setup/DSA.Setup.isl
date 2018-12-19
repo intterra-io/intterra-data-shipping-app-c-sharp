@@ -3726,7 +3726,7 @@
 		<row><td>IDS__TargetReq_DESC_RAM</td><td>1033</td><td>The amount of RAM is not adequate for running [ProductName].</td><td>0</td><td/><td>2091238128</td></row>
 		<row><td>IDS__TargetReq_DESC_RESOLUTION</td><td>1033</td><td>The screen resolution is not adequate for running [ProductName].</td><td>0</td><td/><td>2091238128</td></row>
 		<row><td>ID_STRING1</td><td>1033</td><td/><td>0</td><td/><td>2091240176</td></row>
-		<row><td>ID_STRING2</td><td>1033</td><td>http://www.Intterra.com</td><td>0</td><td/><td>1042734439</td></row>
+		<row><td>ID_STRING2</td><td>1033</td><td>http://www.intterra.com</td><td>0</td><td/><td>-1641664085</td></row>
 		<row><td>ID_STRING3</td><td>1033</td><td>Intterra</td><td>0</td><td/><td>1042734439</td></row>
 		<row><td>IIDS_UITEXT_FeatureUninstalled</td><td>1033</td><td>This feature will remain uninstalled.</td><td>0</td><td/><td>2091238128</td></row>
 	</table>
@@ -4354,7 +4354,7 @@ UwBpAG4AZwBsAGUASQBtAGEAZwBlAAEARQB4AHAAcgBlAHMAcwA=
 		<row><td>PROGRAMFILETOLAUNCHATEND</td><td>[INSTALLDIR]DSA.Application.Primary output</td><td/></row>
 		<row><td>ProductCode</td><td>{93BCAF47-3909-444A-83D8-7522302881C3}</td><td/></row>
 		<row><td>ProductName</td><td>Data Shipping App</td><td/></row>
-		<row><td>ProductVersion</td><td>3.1.2</td><td/></row>
+		<row><td>ProductVersion</td><td>3.1.3</td><td/></row>
 		<row><td>ProgressType0</td><td>install</td><td/></row>
 		<row><td>ProgressType1</td><td>Installing</td><td/></row>
 		<row><td>ProgressType2</td><td>installed</td><td/></row>

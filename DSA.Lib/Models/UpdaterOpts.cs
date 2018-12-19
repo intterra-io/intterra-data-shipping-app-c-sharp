@@ -130,7 +130,9 @@ namespace DSA.Lib.Models
         public string DataName { get; set; } = "(new query)";
         public string CommandText { get; set; } = "";
         public string Path { get; set; } = "";
+        [JsonIgnore]
         public DataTable Data { get; set; }
+        [JsonIgnore]
         public byte[][] Hashes { get; set; }
     }
 
