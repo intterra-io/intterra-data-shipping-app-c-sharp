@@ -1,5 +1,5 @@
 ﻿using DSA.Lib.Core.Data;
-using DSA.Lib.Models;
+using DSA.Lib.Core.Models;
 using System;
 using System.Linq;
 
@@ -72,6 +72,16 @@ namespace DSA.Console.Core
             }
             else
             {
+
+                System.Console.WriteLine($"Welcome to the Intterra");
+                System.Console.WriteLine($"________    _________   _____   ");
+                System.Console.WriteLine($"\\______ \\  /   _____/  /  _  \\  ");
+                System.Console.WriteLine($" |    |  \\ \\_____  \\  /  /_\\  \\ ");
+                System.Console.WriteLine($" |    `   \\/        \\/    |    \\");
+                System.Console.WriteLine($"/_______  /_______  /\\____|__  /");
+                System.Console.WriteLine($"        \\/        \\/         \\/ ");
+                System.Console.WriteLine($"Data Shipping App\n");
+
                 System.Console.WriteLine($"FLAGS:\n\n");
                 System.Console.WriteLine($"Flags\t\tDescription");
                 System.Console.WriteLine($"--run or -r\t\tSpecifies that the data should be transferred");

@@ -7,7 +7,7 @@ using System.Globalization;
 using System.Linq;
 using System.Text;
 
-namespace DSA.Lib.Models
+namespace DSA.Lib.Core.Models
 {
     public class UpdaterOpts
     {

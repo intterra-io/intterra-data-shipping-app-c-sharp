@@ -1,5 +1,5 @@
 ﻿using DSA.Lib.Core.Data;
-using DSA.Lib.Models;
+using DSA.Lib.Core.Models;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using System;

@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace DSA.Lib.Models
+namespace DSA.Lib.Core.Models
 {
     public class HashHistory
     {
