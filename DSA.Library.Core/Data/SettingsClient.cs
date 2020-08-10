@@ -78,12 +78,16 @@ namespace DSA.Lib.Core.Data
             catch (Exception)
             {
                 // something went wrong - either this is first time or malformed object
+                System.Console.WriteLine($"Exception, created default profile");
                 opts = new UpdaterOpts();
             }
 
             // ensure profiles are created as expected
             if (opts.Profiles.Count == 0)
+            {
+                System.Console.WriteLine($"No Profiles Found at path: {GetSettingsFilePath()}");
                 opts.Profiles.Add(GetDefaultProfile());
+            }
 
             return opts;
         }

@@ -25,6 +25,23 @@ Driver={MySQL ODBC 5.3 Unicode Driver};Server=127.0.0.1;Port=3306;Database=test;
 
 - __Local Storage__ is used by the app to persist configurations and runtime logs. These files are located at `<SYSTEM>\ProgramData\Intterra\DSA`
 
+# Linux Setup
+Centos or RHEL was used in this example
+- Use Visual Studio 2019
+- Publish with the following options 
+```
+Target Framework    : netcoreapp3.1
+Deployment Mode     : Self-contained
+Target Runtime      : linux-x64
+File Publish Options -> Check Produce single file
+```
+- [Install .NET Core Runtime environment](https://docs.microsoft.com/en-us/dotnet/core/install/linux-rhel)
+- [Install and Configure ODBC Drivers](https://access.redhat.com/documentation/en-us/red_hat_jboss_data_virtualization/6.3/html/installation_guide/configure_odbc_options_on_red_hat_enterprise_linux)
+- Copy .Core file (DSA.Core) on to the server, run DSA.Core -h to create working directories
+- Copy a settings.json into the working directory, /usr/share/Intterra/DSA in Centos and RHEL
+- Follow Executable -h to run profiles in your settings.json
+
+
 # Release notes
 
 ## 3.x
